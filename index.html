@@ -1,1087 +1,1016 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title> SyncFlow Pro - 1Second Launcher</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+<meta name="theme-color" content="#0b0f17" />
+<title>InstantApp Launcher Pro</title>
+<link rel="manifest" href='data:application/manifest+json,{"name":"InstantApp Launcher","short_name":"InstantApp","start_url":".","display":"standalone","background_color":"#0b0f17","theme_color":"#0b0f17","icons":[{"src":"data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E⚡%3C/text%3E%3C/svg%3E","sizes":"192x192","type":"image/svg+xml"}]}' />
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-  *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif}
   :root{
-    --primary:#00d4ff;--secondary:#ff00aa;--success:#00ff88;--warning:#ffa500;
-    --danger:#ff4466;--purple:#a855f7;--pink:#ec4899;
-    --bg:#06060e;--card:rgba(255,255,255,0.04);--card-hover:rgba(255,255,255,0.08);
-    --border:rgba(255,255,255,0.08);--text:#fff;--muted:#888;
+    --bg:#0a0e1a; --panel:#111827; --panel2:#1a2332; --panel3:#243044;
+    --accent:#00e5a8; --accent2:#7c5cff; --accent3:#f472b6;
+    --danger:#ef4444; --text:#f1f5f9; --muted:#94a3b8; --ok:#22c55e;
+    --warning:#f59e0b; --info:#3b82f6;
+    --shadow:0 4px 24px rgba(0,0,0,0.4);
+    --glow:0 0 20px rgba(0,229,168,0.3);
   }
-  body{background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;
-       background-image:
-         radial-gradient(ellipse at 10% 20%,rgba(0,212,255,0.12) 0%,transparent 50%),
-         radial-gradient(ellipse at 90% 80%,rgba(255,0,170,0.12) 0%,transparent 50%),
-         radial-gradient(ellipse at 50% 50%,rgba(168,85,247,0.06) 0%,transparent 70%);
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    background:radial-gradient(ellipse at top,#1a2332 0%,#0a0e1a 50%);
+    color:var(--text);min-height:100vh;overflow-x:hidden;
   }
-  .container{max-width:1200px;margin:0 auto;padding:20px;min-height:100vh}
   
-  /* HEADER */
-  .header{text-align:center;padding:30px 20px 20px;position:relative}
-  .logo{font-size:42px;font-weight:900;background:linear-gradient(135deg,#00d4ff 0%,#a855f7 50%,#ff00aa 100%);
-        -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-        letter-spacing:-1px;margin-bottom:8px}
-  .logo::before{content:'⚡';margin-right:8px;-webkit-text-fill-color:#00d4ff}
-  .tagline{color:var(--muted);font-size:14px;font-weight:400;letter-spacing:0.5px}
-  .tagline span{color:var(--primary);font-weight:600}
+  /* Header */
+  header{
+    padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.05);
+    display:flex;align-items:center;gap:12px;position:sticky;top:0;
+    background:rgba(10,14,26,0.95);backdrop-filter:blur(20px);z-index:100;
+    box-shadow:0 2px 20px rgba(0,0,0,0.3);
+  }
+  .logo{
+    font-size:20px;font-weight:800;letter-spacing:-0.5px;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+    background-clip:text;flex:1;
+  }
+  .dot{width:10px;height:10px;border-radius:50%;background:var(--danger);box-shadow:0 0 10px var(--danger);transition:all 0.3s}
+  .dot.ok{background:var(--ok);box-shadow:0 0 15px var(--ok);animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
   
-  /* MODE SELECT */
-  .mode-select{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:30px 0}
-  .mode-card{padding:32px 20px;border-radius:20px;border:1px solid var(--border);
-             background:linear-gradient(135deg,rgba(0,212,255,0.05),rgba(168,85,247,0.05));
-             cursor:pointer;text-align:center;transition:all 0.4s cubic-bezier(0.4,0,0.2,1);
-             position:relative;overflow:hidden}
-  .mode-card::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at center,rgba(0,212,255,0.2),transparent 70%);
-                     opacity:0;transition:opacity 0.4s}
-  .mode-card:hover{transform:translateY(-6px);border-color:var(--primary);
-                   box-shadow:0 20px 40px rgba(0,212,255,0.2)}
-  .mode-card:hover::before{opacity:1}
-  .mode-card.active{border-color:var(--secondary);background:linear-gradient(135deg,rgba(255,0,170,0.1),rgba(168,85,247,0.1))}
-  .mode-icon{font-size:48px;margin-bottom:12px;display:block;position:relative;z-index:1}
-  .mode-title{font-weight:800;font-size:18px;margin-bottom:6px;position:relative;z-index:1}
-  .mode-desc{font-size:12px;color:var(--muted);position:relative;z-index:1}
+  main{max-width:1000px;margin:0 auto;padding:20px}
   
-  /* CARDS */
-  .card{background:var(--card);border:1px solid var(--border);border-radius:20px;
-        padding:24px;margin-bottom:20px;backdrop-filter:blur(20px);
-        box-shadow:0 8px 32px rgba(0,0,0,0.3)}
-  .card-title{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;
-              margin-bottom:16px;font-weight:700;display:flex;align-items:center;gap:10px}
-  .card-title .icon{font-size:18px}
+  /* Cards */
+  .card{
+    background:linear-gradient(135deg,var(--panel) 0%,var(--panel2) 100%);
+    border:1px solid rgba(255,255,255,0.08);border-radius:20px;
+    padding:24px;margin-bottom:20px;box-shadow:var(--shadow);
+    backdrop-filter:blur(10px);
+  }
+  .card h2{font-size:18px;margin:0 0 20px;font-weight:700;display:flex;align-items:center;gap:10px}
   
-  /* QR SECTION */
-  .qr-container{text-align:center;padding:28px;background:linear-gradient(135deg,rgba(0,212,255,0.05),rgba(168,85,247,0.05));
-                border-radius:16px;margin:16px 0;border:1px dashed rgba(0,212,255,0.3)}
-  #qrcode{background:#fff;border-radius:12px;display:inline-block;padding:12px;
-          box-shadow:0 10px 30px rgba(0,0,0,0.3)}
-  .room-code{font-family:'Courier New',monospace;font-size:36px;font-weight:900;
-             letter-spacing:8px;color:var(--primary);margin:16px 0;text-align:center;
-             text-shadow:0 0 20px rgba(0,212,255,0.5)}
+  /* Status Banner */
+  .status-banner{
+    padding:16px 20px;border-radius:14px;margin-bottom:20px;
+    display:flex;align-items:center;gap:12px;font-weight:600;
+    box-shadow:var(--shadow);animation:slideIn 0.3s ease;
+  }
+  @keyframes slideIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+  .status-banner.connected{background:linear-gradient(135deg,#052e16,#064e3b);border:1px solid var(--ok);color:var(--ok)}
+  .status-banner.disconnected{background:linear-gradient(135deg,#450a0a,#7f1d1d);border:1px solid var(--danger);color:var(--danger)}
+  .status-banner.waiting{background:linear-gradient(135deg,#422006,#78350f);border:1px solid var(--warning);color:var(--warning)}
   
-  /* CONNECT METHODS */
-  .connect-methods{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
-  .method-btn{padding:16px;border-radius:14px;border:1px solid var(--border);
-              background:var(--card);color:var(--text);cursor:pointer;
-              transition:all 0.3s;font-size:14px;font-weight:600;display:flex;
-              align-items:center;justify-content:center;gap:10px}
-  .method-btn:hover{background:var(--card-hover);border-color:var(--primary);transform:translateY(-2px)}
-  .method-btn.active{background:linear-gradient(135deg,rgba(0,212,255,0.2),rgba(168,85,247,0.2));
-                     border-color:var(--primary);box-shadow:0 0 20px rgba(0,212,255,0.2)}
+  /* Workflow Steps */
+  .workflow{display:grid;gap:20px;margin:20px 0}
+  .step{
+    background:var(--panel2);border:2px solid rgba(255,255,255,0.08);
+    border-radius:16px;padding:20px;position:relative;transition:all 0.3s;
+  }
+  .step.active{border-color:var(--accent);background:linear-gradient(135deg,var(--panel2),var(--panel3));box-shadow:var(--glow)}
+  .step.completed{border-color:var(--ok);background:linear-gradient(135deg,#052e16,#064e3b)}
+  .step-number{
+    position:absolute;top:-14px;left:20px;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    color:#fff;width:32px;height:32px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:700;font-size:14px;box-shadow:0 4px 12px rgba(0,229,168,0.4);
+  }
+  .step.completed .step-number{background:linear-gradient(135deg,var(--ok),#16a34a)}
+  .step-title{font-size:17px;font-weight:700;margin:10px 0 8px}
+  .step-desc{font-size:13.5px;color:var(--muted);line-height:1.6}
   
-  /* STATUS BAR */
-  .status-bar{display:flex;align-items:center;gap:12px;padding:14px;border-radius:14px;
-              background:rgba(0,0,0,0.4);margin-bottom:16px;font-size:13px;
-              border:1px solid var(--border)}
-  .status-dot{width:12px;height:12px;border-radius:50%;background:#444;flex-shrink:0;
-              box-shadow:0 0 10px currentColor}
-  .status-dot.connecting{background:var(--warning);color:var(--warning);animation:pulse 1.5s infinite}
-  .status-dot.connected{background:var(--success);color:var(--success)}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+  /* QR Code */
+  #qrcode{display:flex;justify-content:center;margin:20px 0;padding:24px;background:#fff;border-radius:16px;min-height:260px;align-items:center;box-shadow:0 8px 32px rgba(0,0,0,0.3)}
+  #qrcode img,#qrcode canvas{max-width:100%!important;height:auto!important;border-radius:8px}
+  .qr-info{text-align:center;padding:16px;background:var(--panel3);border-radius:12px;margin-top:16px}
+  .qr-code-display{font-family:"SF Mono",Monaco,monospace;font-size:22px;font-weight:700;color:var(--accent);letter-spacing:3px}
   
-  /* SYNC TOGGLE */
-  .sync-toggle{display:flex;align-items:center;justify-content:space-between;padding:16px;
-               background:linear-gradient(135deg,rgba(0,255,136,0.08),rgba(0,212,255,0.08));
-               border:1px solid rgba(0,255,136,0.3);border-radius:14px;margin-bottom:16px;cursor:pointer;
-               transition:all 0.3s}
-  .sync-toggle:hover{background:linear-gradient(135deg,rgba(0,255,136,0.12),rgba(0,212,255,0.12))}
-  .sync-toggle.active{background:linear-gradient(135deg,rgba(0,255,136,0.15),rgba(0,212,255,0.15));
-                      border-color:var(--success)}
-  .toggle-switch{width:52px;height:28px;background:#333;border-radius:14px;position:relative;transition:0.3s}
-  .toggle-switch::after{content:'';position:absolute;width:24px;height:24px;background:#fff;
-                        border-radius:50%;top:2px;left:2px;transition:0.3s;box-shadow:0 2px 6px rgba(0,0,0,0.3)}
-  .sync-toggle.active .toggle-switch{background:var(--success)}
-  .sync-toggle.active .toggle-switch::after{left:26px}
+  /* Inputs & Buttons */
+  input,select,button,textarea{
+    width:100%;padding:14px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);
+    background:var(--panel3);color:var(--text);font-size:15px;outline:none;font-family:inherit;
+    transition:all 0.2s;
+  }
+  input:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,229,168,0.1)}
+  button{
+    cursor:pointer;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent2));
+    border:none;color:#fff;transition:all 0.2s;box-shadow:0 4px 16px rgba(0,229,168,0.3);
+  }
+  button:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,229,168,0.4)}
+  button:active{transform:scale(0.97)}
+  button:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+  button.ghost{background:var(--panel3);color:var(--text);border:1px solid rgba(255,255,255,0.1);box-shadow:none}
+  button.ghost:hover{background:var(--panel2);border-color:var(--accent)}
+  button.success{background:linear-gradient(135deg,#22c55e,#16a34a);box-shadow:0 4px 16px rgba(34,197,94,0.3)}
+  button.danger{background:linear-gradient(135deg,#ef4444,#dc2626);box-shadow:0 4px 16px rgba(239,68,68,0.3)}
   
-  /* INPUTS & BUTTONS */
-  input,button{width:100%;padding:14px 16px;border-radius:12px;border:1px solid var(--border);
-               background:var(--card);color:var(--text);font-size:14px;outline:none;
-               transition:all 0.2s;margin-bottom:10px;font-family:inherit}
-  input:focus{border-color:var(--primary);background:rgba(0,212,255,0.05)}
-  button{background:linear-gradient(135deg,var(--primary),var(--purple));border:none;
-         font-weight:700;cursor:pointer;text-transform:uppercase;letter-spacing:0.5px}
-  button:hover{transform:translateY(-2px);box-shadow:0 10px 25px rgba(0,212,255,0.3)}
-  button:active{transform:translateY(0)}
-  button.secondary{background:var(--card);border:1px solid var(--border)}
-  button.secondary:hover{background:var(--card-hover)}
+  /* Category Tabs */
+  .category-tabs{
+    display:flex;gap:8px;overflow-x:auto;padding:4px;margin-bottom:20px;
+    scrollbar-width:none;-ms-overflow-style:none;
+  }
+  .category-tabs::-webkit-scrollbar{display:none}
+  .tab{
+    padding:10px 18px;border-radius:10px;background:var(--panel3);
+    border:1px solid rgba(255,255,255,0.08);cursor:pointer;
+    white-space:nowrap;font-size:13px;font-weight:600;transition:all 0.2s;
+  }
+  .tab:hover{background:var(--panel2);border-color:var(--accent)}
+  .tab.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-color:transparent}
   
-  /* LAUNCHER GRID - MAIN FEATURE */
-  .launcher-section{margin-top:24px}
-  .category{margin-bottom:28px}
-  .category-header{display:flex;align-items:center;gap:12px;margin-bottom:14px;
-                   padding-bottom:10px;border-bottom:1px solid var(--border)}
-  .category-icon{font-size:24px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;
-                 border-radius:10px;background:linear-gradient(135deg,rgba(0,212,255,0.15),rgba(168,85,247,0.15))}
-  .category-title{font-size:16px;font-weight:800;letter-spacing:0.5px}
-  .category-count{font-size:11px;color:var(--muted);margin-left:auto;font-weight:500}
+  /* Search */
+  .search-box{
+    position:relative;margin-bottom:20px;
+  }
+  .search-box input{
+    padding-left:44px;background:var(--panel3);border:1px solid rgba(255,255,255,0.1);
+  }
+  .search-box::before{
+    content:"🔍";position:absolute;left:16px;top:50%;transform:translateY(-50%);
+    font-size:16px;opacity:0.6;
+  }
   
-  .app-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px}
-  .app-card{position:relative;padding:14px 8px;border-radius:14px;
-            background:var(--card);border:1px solid var(--border);
-            cursor:pointer;transition:all 0.25s cubic-bezier(0.4,0,0.2,1);
-            text-align:center;overflow:hidden}
-  .app-card::before{content:'';position:absolute;inset:0;
-                    background:linear-gradient(135deg,transparent,rgba(255,255,255,0.05));
-                    opacity:0;transition:opacity 0.3s}
-  .app-card:hover{transform:translateY(-4px);border-color:var(--primary);
-                  box-shadow:0 10px 25px rgba(0,0,0,0.4),0 0 0 1px var(--primary)}
-  .app-card:hover::before{opacity:1}
-  .app-card:active{transform:translateY(-2px) scale(0.97)}
-  .app-icon{font-size:28px;margin-bottom:6px;display:block;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3))}
-  .app-name{font-size:11px;font-weight:600;color:var(--text);line-height:1.2;
-            white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .app-type{position:absolute;top:6px;right:6px;font-size:8px;padding:2px 5px;
-            border-radius:4px;font-weight:700;text-transform:uppercase}
-  .app-type.web{background:rgba(0,212,255,0.2);color:var(--primary)}
-  .app-type.desktop{background:rgba(168,85,247,0.2);color:var(--purple)}
+  /* Apps Grid */
+  .apps{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px;margin-top:12px}
+  .app{
+    background:linear-gradient(135deg,var(--panel2),var(--panel3));
+    border:1px solid rgba(255,255,255,0.08);border-radius:16px;
+    padding:18px 12px;text-align:center;cursor:pointer;transition:all 0.25s;
+    position:relative;overflow:hidden;
+  }
+  .app::before{
+    content:"";position:absolute;top:0;left:0;right:0;height:3px;
+    background:linear-gradient(90deg,var(--accent),var(--accent2));
+    transform:scaleX(0);transition:transform 0.3s;
+  }
+  .app:hover{
+    border-color:var(--accent);transform:translateY(-4px);
+    box-shadow:0 8px 24px rgba(0,229,168,0.2);
+  }
+  .app:hover::before{transform:scaleX(1)}
+  .app:active{transform:scale(0.95)}
+  .app .ico{
+    font-size:32px;display:block;margin-bottom:8px;
+    filter:drop-shadow(0 2px 8px rgba(0,0,0,0.3));
+  }
+  .app .nm{font-size:12.5px;font-weight:600;color:var(--text);line-height:1.3}
   
-  /* Category-specific colors */
-  .cat-search .category-icon{background:linear-gradient(135deg,#4285f4,#34a853)}
-  .cat-ai .category-icon{background:linear-gradient(135deg,#10a37f,#8b5cf6)}
-  .cat-social .category-icon{background:linear-gradient(135deg,#e1306c,#405de6)}
-  .cat-streaming .category-icon{background:linear-gradient(135deg,#e50914,#1db954)}
-  .cat-shopping .category-icon{background:linear-gradient(135deg,#ff9900,#146eb4)}
-  .cat-productivity .category-icon{background:linear-gradient(135deg,#0078d4,#5b2fc9)}
-  .cat-gaming .category-icon{background:linear-gradient(135deg,#1b2838,#66c0f4)}
-  .cat-dev .category-icon{background:linear-gradient(135deg,#24292e,#58a6ff)}
-  .cat-news .category-icon{background:linear-gradient(135deg,#cc0000,#333)}
-  .cat-travel .category-icon{background:linear-gradient(135deg,#ff5a5f,#00a699)}
-  .cat-learning .category-icon{background:linear-gradient(135deg,#0077b5,#f89820)}
-  .cat-finance .category-icon{background:linear-gradient(135deg,#0066ff,#00c853)}
-  .cat-desktop .category-icon{background:linear-gradient(135deg,#0078d4,#7fba00)}
-  .cat-creative .category-icon{background:linear-gradient(135deg,#ff006e,#8338ec)}
+  /* Quick Actions */
+  .quick-actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:16px}
+  .quick-btn{
+    padding:20px 16px;border-radius:16px;
+    background:linear-gradient(135deg,var(--panel2),var(--panel3));
+    border:2px solid rgba(255,255,255,0.08);cursor:pointer;
+    transition:all 0.25s;text-align:center;position:relative;overflow:hidden;
+  }
+  .quick-btn::before{
+    content:"";position:absolute;inset:0;
+    background:linear-gradient(135deg,rgba(0,229,168,0.1),rgba(124,92,255,0.1));
+    opacity:0;transition:opacity 0.3s;
+  }
+  .quick-btn:hover{border-color:var(--accent);transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,229,168,0.2)}
+  .quick-btn:hover::before{opacity:1}
+  .quick-btn:active{transform:scale(0.96)}
+  .quick-btn .icon{font-size:32px;display:block;margin-bottom:10px;position:relative;z-index:1}
+  .quick-btn .label{font-size:14px;font-weight:700;position:relative;z-index:1}
+  .quick-btn .desc{font-size:11.5px;color:var(--muted);margin-top:6px;position:relative;z-index:1}
   
-  /* SEARCH BAR */
-  .search-container{position:relative;margin-bottom:20px}
-  .search-input{width:100%;padding:14px 16px 14px 44px;border-radius:14px;
-                border:1px solid var(--border);background:var(--card);color:var(--text);
-                font-size:14px;outline:none;transition:all 0.3s}
-  .search-input:focus{border-color:var(--primary);background:rgba(0,212,255,0.05);
-                      box-shadow:0 0 0 3px rgba(0,212,255,0.1)}
-  .search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:18px;color:var(--muted)}
+  /* Clipboard Monitor */
+  .clipboard-monitor{
+    background:linear-gradient(135deg,#1e3a8a,#3b82f6);
+    border-radius:16px;padding:20px;margin:16px 0;
+    box-shadow:0 8px 24px rgba(59,130,246,0.3);
+  }
+  .clipboard-monitor h3{margin:0 0 10px;font-size:16px;font-weight:700}
+  .clipboard-monitor p{margin:0;font-size:13.5px;opacity:0.95;line-height:1.5}
+  .clipboard-toggle{display:flex;align-items:center;gap:12px;margin-top:14px}
+  .switch{position:relative;width:54px;height:28px}
+  .switch input{opacity:0;width:0;height:0}
+  .slider{
+    position:absolute;cursor:pointer;inset:0;
+    background-color:rgba(255,255,255,0.2);transition:0.3s;border-radius:28px;
+  }
+  .slider:before{
+    position:absolute;content:"";height:22px;width:22px;left:3px;bottom:3px;
+    background-color:white;transition:0.3s;border-radius:50%;
+    box-shadow:0 2px 8px rgba(0,0,0,0.3);
+  }
+  input:checked + .slider{background-color:var(--accent)}
+  input:checked + .slider:before{transform:translateX(26px)}
   
-  /* LOG */
-  .log-container{max-height:180px;overflow-y:auto;font-family:'Courier New',monospace;
-                 font-size:11px;background:rgba(0,0,0,0.5);padding:12px;border-radius:12px;
-                 border:1px solid var(--border)}
-  .log-entry{padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
-  .log-entry.info{color:var(--muted)}
-  .log-entry.success{color:var(--success)}
-  .log-entry.error{color:var(--danger)}
-  .log-entry.sync{color:var(--primary)}
+  /* Log */
+  .log{
+    background:#0a0f1a;border:1px solid rgba(255,255,255,0.08);border-radius:14px;
+    padding:16px;max-height:300px;overflow:auto;
+    font-family:"SF Mono",Monaco,monospace;font-size:13px;
+  }
+  .log .e{padding:6px 0;border-bottom:1px dashed rgba(255,255,255,0.08)}
+  .log .e:last-child{border-bottom:none}
+  .log .t{color:var(--muted);margin-right:10px;font-size:11.5px}
+  .log .ok{color:var(--ok)}
+  .log .err{color:var(--danger)}
+  .log .warn{color:var(--warning)}
   
-  /* BADGES */
-  .badge{display:inline-block;padding:4px 10px;border-radius:8px;font-size:10px;
-         font-weight:700;text-transform:uppercase;letter-spacing:0.5px}
-  .badge.bt{background:#0066cc;color:#fff}
-  .badge.p2p{background:var(--primary);color:#000}
-  
-  /* BT DEVICES */
-  .bt-name-display{background:linear-gradient(135deg,rgba(0,102,204,0.15),rgba(0,212,255,0.15));
-                   border:2px solid #0066cc;border-radius:14px;padding:20px;text-align:center;margin:16px 0}
-  .bt-name-label{font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;letter-spacing:1px}
-  .bt-name-value{font-family:'Courier New',monospace;font-size:26px;font-weight:900;
-                 color:#0066cc;letter-spacing:2px;text-shadow:0 0 15px rgba(0,102,204,0.5)}
-  .bt-device{padding:14px;background:var(--card);border:1px solid var(--border);
-             border-radius:12px;margin-bottom:8px;cursor:pointer;transition:all 0.2s;
-             display:flex;align-items:center;gap:12px}
-  .bt-device:hover{background:var(--card-hover);border-color:var(--primary);transform:translateX(4px)}
-  .bt-device-icon{font-size:24px}
-  .bt-device-name{font-weight:600;font-size:14px}
-  .bt-device-id{font-size:10px;color:var(--muted);font-family:monospace}
+  /* Toast */
+  .toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120px);
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    color:#fff;padding:16px 32px;border-radius:14px;font-weight:700;
+    opacity:0;pointer-events:none;transition:all 0.3s;z-index:1000;
+    box-shadow:0 8px 32px rgba(0,229,168,0.4);font-size:14px;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .toast.error{background:linear-gradient(135deg,#ef4444,#dc2626);box-shadow:0 8px 32px rgba(239,68,68,0.4)}
   
   .hidden{display:none!important}
-  .flash{position:fixed;inset:0;background:var(--primary);opacity:0;pointer-events:none;
-         transition:opacity 0.2s;z-index:9999}
-  .flash.active{opacity:0.15}
-  
-  /* SCANNER */
-  #scanner{width:100%;border-radius:12px;overflow:hidden;margin:12px 0}
-  
-  /* RESPONSIVE */
-  @media (max-width:768px){
-    .container{padding:12px}
-    .logo{font-size:32px}
-    .app-grid{grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px}
-    .app-card{padding:12px 6px}
-    .app-icon{font-size:24px}
-    .app-name{font-size:10px}
-    .room-code{font-size:28px;letter-spacing:6px}
+  .pill{
+    display:inline-block;padding:5px 14px;border-radius:999px;
+    background:var(--panel3);border:1px solid rgba(255,255,255,0.1);
+    font-size:12px;color:var(--muted);font-weight:700;
   }
-  @media (max-width:480px){
-    .mode-select{grid-template-columns:1fr}
-    .app-grid{grid-template-columns:repeat(3,1fr)}
-  }
+  .pill.ok{background:#052e16;border-color:var(--ok);color:var(--ok)}
   
-  /* SCROLLBAR */
-  ::-webkit-scrollbar{width:8px;height:8px}
-  ::-webkit-scrollbar-track{background:rgba(0,0,0,0.2)}
-  ::-webkit-scrollbar-thumb{background:var(--primary);border-radius:4px}
-  ::-webkit-scrollbar-thumb:hover{background:var(--purple)}
+  .hint{color:var(--muted);font-size:13px;margin-top:10px;line-height:1.6}
+  
+  .row{display:flex;gap:12px;flex-wrap:wrap}
+  .row > *{flex:1;min-width:180px}
+  
+  label{display:block;font-size:12px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;font-weight:700}
+  
+  @media(max-width:600px){
+    .quick-actions{grid-template-columns:1fr 1fr}
+    .apps{grid-template-columns:repeat(auto-fill,minmax(100px,1fr))}
+    .app{padding:14px 8px}
+    .app .ico{font-size:28px}
+    .app .nm{font-size:11.5px}
+  }
 </style>
 </head>
 <body>
-<div class="flash" id="flash"></div>
-<div class="container">
-  <div class="header">
-    <div class="logo">SyncFlow Pro</div>
-    <div class="tagline">⚡ 1Second Launcher · <span>Phone ↔ Laptop</span> · Instant Sync</div>
-  </div>
 
-  <!-- MODE SELECTION -->
-  <div id="modeSelect">
-    <div class="mode-select">
-      <div class="mode-card" onclick="selectMode('laptop')">
-        <span class="mode-icon">💻</span>
-        <div class="mode-title">LAPTOP</div>
-        <div class="mode-desc">Generate QR · Host connection</div>
-      </div>
-      <div class="mode-card" onclick="selectMode('phone')">
-        <span class="mode-icon">📱</span>
-        <div class="mode-title">PHONE</div>
-        <div class="mode-desc">Scan QR · Join session</div>
-      </div>
-    </div>
+<header>
+  <div class="logo">⚡ InstantApp Launcher</div>
+  <div id="statusDot" class="dot"></div>
+  <span id="statusText" class="pill">offline</span>
+</header>
+
+<main>
+
+  <!-- CONNECTION SETUP -->
+  <section id="setup" class="card">
+    <h2>🔗 Connection Setup</h2>
     
-    <div class="card">
-      <div class="card-title"><span class="icon">📋</span>How It Works</div>
-      <div style="font-size:13px;color:var(--muted);line-height:1.7">
-        <b style="color:var(--primary)">1.</b> Open on <b>LAPTOP</b> → QR code appears<br>
-        <b style="color:var(--primary)">2.</b> Open on <b>PHONE</b> → Scan QR with camera<br>
-        <b style="color:var(--primary)">3.</b> Enable <b>Auto-Sync</b> on both devices<br>
-        <b style="color:var(--primary)">4.</b> Click any app below → Opens instantly on both!
+    <div class="workflow">
+      <div class="step" id="step1">
+        <div class="step-number">1</div>
+        <div class="step-title">💻 Open on Laptop FIRST</div>
+        <div class="step-desc">
+          Open this page on your laptop. It will automatically generate a QR code for your phone to scan.
+        </div>
+        <button id="startLaptop" class="success" style="margin-top:14px">I'm on my Laptop - Start</button>
       </div>
-    </div>
-  </div>
 
-  <!-- LAPTOP MODE -->
-  <div id="laptopMode" class="hidden">
-    <div class="card">
-      <div class="card-title"><span class="icon">📱</span>Connection Methods</div>
-      <div class="connect-methods">
-        <button class="method-btn active" onclick="setConnectMethod('qr')" id="btnQR">
-          <span>📷</span> QR Code
-        </button>
-        <button class="method-btn" onclick="setConnectMethod('bluetooth')" id="btnBT">
-          <span>🔵</span> Bluetooth
-        </button>
+      <div class="step hidden" id="step2">
+        <div class="step-number">2</div>
+        <div class="step-title">📱 Scan QR Code with Phone</div>
+        <div class="step-desc">
+          Open your phone camera or QR scanner and scan the code below. This will open the page on your phone and connect automatically.
+        </div>
+        <div id="qrcode"></div>
+        <div class="qr-info">
+          <div style="color:var(--muted);font-size:12px;margin-bottom:6px">Or enter this code manually:</div>
+          <div class="qr-code-display" id="roomDisplay">---</div>
+        </div>
+        <div class="hint" style="text-align:center;margin-top:14px">
+          Waiting for phone to connect... <span id="waitTimer">0s</span>
+        </div>
       </div>
-      
-      <div id="qrMethod">
-        <div class="qr-container">
-          <div id="qrcode"></div>
-          <div class="room-code" id="roomCode">------</div>
-          <div style="font-size:12px;color:var(--muted);margin-top:8px">
-            📱 Point phone camera at QR to connect
+
+      <div class="step hidden" id="step3">
+        <div class="step-number">3</div>
+        <div class="step-title">📱 Open on Phone</div>
+        <div class="step-desc">
+          If you're on your phone now, scan the QR code from your laptop screen, or enter the room code manually.
+        </div>
+        <button id="startPhone" class="success" style="margin-top:14px">I'm on my Phone - Connect</button>
+        <div id="manualConnect" class="hidden" style="margin-top:14px">
+          <label>Enter Room Code from Laptop</label>
+          <div class="row">
+            <input id="roomInput" placeholder="Enter code" autocomplete="off" />
+            <button id="connectBtn" style="flex:0 0 120px">Connect</button>
           </div>
         </div>
       </div>
-      
-      <div id="btMethod" class="hidden">
-        <div class="bt-name-display">
-          <div class="bt-name-label">🔵 Bluetooth Device Name</div>
-          <div class="bt-name-value" id="btDeviceName">SYNCFLOW-XXXX</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:8px">
-            Connect directly from phone Bluetooth settings
-          </div>
-        </div>
-        <button onclick="startBluetoothDiscovery()">🔍 Scan for Devices</button>
-        <button onclick="advertiseBluetooth()" class="secondary">📡 Advertise This Device</button>
-        <div id="btDeviceList" style="margin-top:12px"></div>
-      </div>
     </div>
+  </section>
 
-    <div class="card">
-      <div class="status-bar">
-        <div class="status-dot" id="laptopStatusDot"></div>
-        <div style="flex:1">
-          <div style="font-weight:600" id="laptopStatusText">Waiting for connection...</div>
-          <div style="font-size:11px;color:var(--muted)" id="laptopStatusSub">Share QR code with phone</div>
-        </div>
-        <span class="badge p2p" id="connBadge">P2P</span>
-      </div>
-      
-      <div class="sync-toggle" onclick="toggleSync()" id="syncToggle">
-        <div>
-          <div style="font-weight:700">🔄 Auto-Sync Mode</div>
-          <div style="font-size:11px;color:var(--muted)">Clicks sync to phone instantly</div>
-        </div>
-        <div class="toggle-switch"></div>
-      </div>
-      
-      <div class="card-title"><span class="icon">📊</span>Activity Log</div>
-      <div class="log-container" id="laptopLog">
-        <div class="log-entry info">System initialized...</div>
-      </div>
-    </div>
-
-    <button class="secondary" onclick="location.reload()">🔄 Reset</button>
+  <!-- STATUS BANNER -->
+  <div id="statusBanner" class="status-banner disconnected hidden">
+    <span id="bannerIcon">❌</span>
+    <span id="bannerText">Not connected</span>
   </div>
 
-  <!-- PHONE MODE -->
-  <div id="phoneMode" class="hidden">
-    <div class="card">
-      <div class="card-title"><span class="icon">📷</span>Connect to Laptop</div>
-      
-      <div id="qrScanner">
-        <div id="scanner"></div>
-        <button onclick="startScanner()" id="scanBtn">📷 Start Camera Scanner</button>
-        <div style="font-size:11px;color:var(--muted);text-align:center;margin:10px 0">
-          Or enter code manually:
-        </div>
-        <input type="text" id="manualCode" placeholder="Enter 6-char code" maxlength="6" 
-               style="text-transform:uppercase;letter-spacing:4px;text-align:center;font-weight:700;font-size:18px"
-               oninput="this.value=this.value.toUpperCase()">
-        <button onclick="connectManual()" class="secondary"> Connect via Code</button>
-      </div>
-      
-      <div id="btScanner" class="hidden">
-        <input type="text" id="btNameInput" placeholder="SYNCFLOW-XXXX" 
-               style="text-transform:uppercase;text-align:center;font-weight:600">
-        <button onclick="connectBluetoothByName()" style="background:#0066cc">🔵 Connect by Name</button>
-        <button onclick="scanBluetoothPhone()" class="secondary">🔍 Scan Devices</button>
-        <div id="btPhoneDeviceList" style="margin-top:12px"></div>
+  <!-- PHONE UI -->
+  <section id="phoneUI" class="card hidden">
+    <h2>📱 Phone Controller</h2>
+
+    <div class="clipboard-monitor">
+      <h3>📋 Auto-Send Copied Links</h3>
+      <p>Automatically send links you copy to your laptop</p>
+      <div class="clipboard-toggle">
+        <label class="switch">
+          <input type="checkbox" id="clipboardToggle" checked>
+          <span class="slider"></span>
+        </label>
+        <span style="font-size:13.5px">Enable clipboard monitoring</span>
       </div>
     </div>
 
-    <div id="phoneControls" class="hidden">
-      <div class="card">
-        <div class="status-bar">
-          <div class="status-dot connected" id="phoneStatusDot"></div>
-          <div style="flex:1">
-            <div style="font-weight:600" id="phoneStatusText">Connected!</div>
-            <div style="font-size:11px;color:var(--muted)" id="phoneStatusSub">Ready to sync</div>
-          </div>
-          <span class="badge p2p" id="phoneBadge">P2P</span>
-        </div>
-        
-        <div class="sync-toggle active" onclick="togglePhoneSync()" id="phoneSyncToggle">
-          <div>
-            <div style="font-weight:700">🔄 Auto-Sync Enabled</div>
-            <div style="font-size:11px;color:var(--muted)">Clicks sync to laptop</div>
-          </div>
-          <div class="toggle-switch"></div>
-        </div>
+    <label>Quick Actions</label>
+    <div class="quick-actions">
+      <div class="quick-btn" onclick="sendCurrentPage()">
+        <span class="icon">📤</span>
+        <span class="label">Send This Page</span>
+        <span class="desc">Open current URL on laptop</span>
+      </div>
+      <div class="quick-btn" onclick="shareCurrentPage()">
+        <span class="icon">📲</span>
+        <span class="label">Share to Laptop</span>
+        <span class="desc">Use system share menu</span>
+      </div>
+      <div class="quick-btn" onclick="showCustomInput()">
+        <span class="icon">✍️</span>
+        <span class="label">Custom Link</span>
+        <span class="desc">Enter any URL or app</span>
+      </div>
+      <div class="quick-btn" onclick="pasteFromClipboard()">
+        <span class="icon">📋</span>
+        <span class="label">Paste & Send</span>
+        <span class="desc">Send clipboard content</span>
       </div>
     </div>
-  </div>
 
-  <!-- LAUNCHER GRID - SHARED BY BOTH MODES -->
-  <div id="launcherSection" class="launcher-section hidden">
-    <div class="search-container">
-      <span class="search-icon">🔍</span>
-      <input type="text" class="search-input" id="searchInput" placeholder="Search apps & websites..." oninput="filterApps()">
+    <div id="customInputSection" class="hidden" style="margin-top:20px">
+      <label>Send Custom URL or App</label>
+      <div class="row">
+        <input id="customUrl" placeholder="https://... or app://..." />
+        <button id="sendCustom" style="flex:0 0 120px">Send ⚡</button>
+      </div>
     </div>
-    <div id="launcherGrid"></div>
-  </div>
-</div>
+
+    <label style="margin-top:24px">Search Apps</label>
+    <div class="search-box">
+      <input id="searchInput" type="text" placeholder="Search apps and websites..." />
+    </div>
+
+    <div class="category-tabs" id="categoryTabs"></div>
+
+    <label>Quick Launch Apps</label>
+    <div class="apps" id="appGrid"></div>
+  </section>
+
+  <!-- LAPTOP UI -->
+  <section id="laptopUI" class="card hidden">
+    <h2>💻 Laptop Receiver</h2>
+    
+    <div class="hint" style="margin-bottom:20px">
+      ✅ Ready to receive! Links and apps from your phone will open automatically here.
+    </div>
+
+    <label>Activity Log</label>
+    <div class="log" id="log"></div>
+    
+    <div class="row" style="margin-top:16px">
+      <button class="ghost" onclick="clearLog()">Clear Log</button>
+      <button class="ghost" onclick="testOpen()">Test Open</button>
+      <button class="ghost" onclick="disconnect()">Disconnect</button>
+    </div>
+  </section>
+
+</main>
+
+<div class="toast" id="toast"></div>
 
 <script>
-/* ==================== MASSIVE APP DATABASE ==================== */
-const APPS = {
-  //  SEARCH ENGINES
-  google:       {uri:'https://google.com',          name:'Google',       icon:'🔍', cat:'search',    type:'web'},
-  bing:         {uri:'https://bing.com',            name:'Bing',         icon:'', cat:'search',    type:'web'},
-  duckduckgo:   {uri:'https://duckduckgo.com',      name:'DuckDuckGo',   icon:'🦆', cat:'search',    type:'web'},
-  yahoo:        {uri:'https://yahoo.com',           name:'Yahoo',        icon:'📧', cat:'search',    type:'web'},
-  baidu:        {uri:'https://baidu.com',           name:'Baidu',        icon:'', cat:'search',    type:'web'},
-  yandex:       {uri:'https://yandex.com',          name:'Yandex',       icon:'🇷🇺', cat:'search',    type:'web'},
-  ecosia:       {uri:'https://ecosia.org',          name:'Ecosia',       icon:'🌳', cat:'search',    type:'web'},
-  startpage:    {uri:'https://startpage.com',       name:'Startpage',    icon:'🔒', cat:'search',    type:'web'},
+/* ============================================================
+   InstantApp Launcher Pro - Enhanced with 100+ Apps
+   ============================================================ */
 
-  //  AI TOOLS
-  chatgpt:      {uri:'https://chat.openai.com',     name:'ChatGPT',      icon:'', cat:'ai',        type:'web'},
-  claude:       {uri:'https://claude.ai',           name:'Claude',       icon:'🧠', cat:'ai',        type:'web'},
-  gemini:       {uri:'https://gemini.google.com',   name:'Gemini',       icon:'✨', cat:'ai',        type:'web'},
-  copilot:      {uri:'https://copilot.microsoft.com',name:'Copilot',    icon:'', cat:'ai',        type:'web'},
-  perplexity:   {uri:'https://perplexity.ai',       name:'Perplexity',   icon:'🔮', cat:'ai',        type:'web'},
-  midjourney:   {uri:'https://midjourney.com',      name:'Midjourney',   icon:'', cat:'ai',        type:'web'},
-  leonardo:     {uri:'https://leonardo.ai',         name:'Leonardo AI',  icon:'🖼️', cat:'ai',        type:'web'},
-  runway:       {uri:'https://runwayml.com',        name:'Runway',       icon:'', cat:'ai',        type:'web'},
-  elevenlabs:   {uri:'https://elevenlabs.io',       name:'ElevenLabs',   icon:'🎙️', cat:'ai',        type:'web'},
-  sora:         {uri:'https://sora.com',            name:'Sora',         icon:'', cat:'ai',        type:'web'},
-  grok:         {uri:'https://grok.x.ai',           name:'Grok',         icon:'⚡', cat:'ai',        type:'web'},
-  deepseek:     {uri:'https://deepseek.com',        name:'DeepSeek',     icon:'🔬', cat:'ai',        type:'web'},
-
-  // 📱 SOCIAL MEDIA
-  facebook:     {uri:'https://facebook.com',        name:'Facebook',     icon:'📘', cat:'social',    type:'web'},
-  instagram:    {uri:'https://instagram.com',       name:'Instagram',    icon:'📸', cat:'social',    type:'web'},
-  twitter:      {uri:'https://twitter.com',         name:'X / Twitter',  icon:'🐦', cat:'social',    type:'web'},
-  tiktok:       {uri:'https://tiktok.com',          name:'TikTok',       icon:'🎵', cat:'social',    type:'web'},
-  linkedin:     {uri:'https://linkedin.com',        name:'LinkedIn',     icon:'💼', cat:'social',    type:'web'},
-  pinterest:    {uri:'https://pinterest.com',       name:'Pinterest',    icon:'📌', cat:'social',    type:'web'},
-  snapchat:     {uri:'https://snapchat.com',        name:'Snapchat',     icon:'👻', cat:'social',    type:'web'},
-  reddit:       {uri:'https://reddit.com',          name:'Reddit',       icon:'🤖', cat:'social',    type:'web'},
-  tumblr:       {uri:'https://tumblr.com',          name:'Tumblr',       icon:'📝', cat:'social',    type:'web'},
-  threads:      {uri:'https://threads.net',         name:'Threads',      icon:'', cat:'social',    type:'web'},
-  discord:      {uri:'https://discord.com',         name:'Discord',      icon:'💬', cat:'social',    type:'web'},
-  telegram:     {uri:'https://web.telegram.org',    name:'Telegram',     icon:'✈️', cat:'social',    type:'web'},
-  whatsapp:     {uri:'https://web.whatsapp.com',    name:'WhatsApp',     icon:'💚', cat:'social',    type:'web'},
-  signal:       {uri:'https://signal.org',          name:'Signal',       icon:'🔐', cat:'social',    type:'web'},
-  mastodon:     {uri:'https://mastodon.social',     name:'Mastodon',     icon:'🐘', cat:'social',    type:'web'},
-  twitch:       {uri:'https://twitch.tv',           name:'Twitch',       icon:'', cat:'social',    type:'web'},
-
-  // 🎬 STREAMING & MUSIC
-  youtube:      {uri:'https://youtube.com',         name:'YouTube',      icon:'▶️', cat:'streaming', type:'web'},
-  netflix:      {uri:'https://netflix.com',         name:'Netflix',      icon:'🎬', cat:'streaming', type:'web'},
-  spotify:      {uri:'https://open.spotify.com',    name:'Spotify',      icon:'🎵', cat:'streaming', type:'web'},
-  applemusic:   {uri:'https://music.apple.com',     name:'Apple Music',  icon:'🎶', cat:'streaming', type:'web'},
-  disneyplus:   {uri:'https://disneyplus.com',      name:'Disney+',      icon:'🏰', cat:'streaming', type:'web'},
-  hulu:         {uri:'https://hulu.com',            name:'Hulu',         icon:'', cat:'streaming', type:'web'},
-  primevideo:   {uri:'https://primevideo.com',      name:'Prime Video',  icon:'📦', cat:'streaming', type:'web'},
-  hbomax:       {uri:'https://max.com',             name:'Max (HBO)',    icon:'', cat:'streaming', type:'web'},
-  soundcloud:   {uri:'https://soundcloud.com',      name:'SoundCloud',   icon:'☁️', cat:'streaming', type:'web'},
-  tidal:        {uri:'https://tidal.com',           name:'Tidal',        icon:'🌊', cat:'streaming', type:'web'},
-  crunchyroll:  {uri:'https://crunchyroll.com',     name:'Crunchyroll',  icon:'🍥', cat:'streaming', type:'web'},
-  vimeo:        {uri:'https://vimeo.com',           name:'Vimeo',        icon:'🎞️', cat:'streaming', type:'web'},
-  peacock:      {uri:'https://peacocktv.com',       name:'Peacock',      icon:'🦚', cat:'streaming', type:'web'},
-  paramount:    {uri:'https://paramountplus.com',   name:'Paramount+',   icon:'⛰️', cat:'streaming', type:'web'},
-
-  // 🛍️ SHOPPING
-  amazon:       {uri:'https://amazon.com',          name:'Amazon',       icon:'📦', cat:'shopping',  type:'web'},
-  ebay:         {uri:'https://ebay.com',            name:'eBay',         icon:'🏷️', cat:'shopping',  type:'web'},
-  walmart:      {uri:'https://walmart.com',         name:'Walmart',      icon:'', cat:'shopping',  type:'web'},
-  target:       {uri:'https://target.com',          name:'Target',       icon:'', cat:'shopping',  type:'web'},
-  aliexpress:   {uri:'https://aliexpress.com',      name:'AliExpress',   icon:'🌐', cat:'shopping',  type:'web'},
-  etsy:         {uri:'https://etsy.com',            name:'Etsy',         icon:'🧶', cat:'shopping',  type:'web'},
-  bestbuy:      {uri:'https://bestbuy.com',         name:'Best Buy',     icon:'', cat:'shopping',  type:'web'},
-  newegg:       {uri:'https://newegg.com',          name:'Newegg',       icon:'🥚', cat:'shopping',  type:'web'},
-  shopify:      {uri:'https://shopify.com',         name:'Shopify',      icon:'🛍️', cat:'shopping',  type:'web'},
-  wish:         {uri:'https://wish.com',            name:'Wish',         icon:'⭐', cat:'shopping',  type:'web'},
-
-  // 💼 PRODUCTIVITY
-  gmail:        {uri:'https://mail.google.com',     name:'Gmail',        icon:'📧', cat:'productivity',type:'web'},
-  outlook:      {uri:'https://outlook.live.com',    name:'Outlook',      icon:'📬', cat:'productivity',type:'web'},
-  googledrive:  {uri:'https://drive.google.com',    name:'Google Drive', icon:'📁', cat:'productivity',type:'web'},
-  dropbox:      {uri:'https://dropbox.com',         name:'Dropbox',      icon:'', cat:'productivity',type:'web'},
-  onedrive:     {uri:'https://onedrive.live.com',   name:'OneDrive',     icon:'☁️', cat:'productivity',type:'web'},
-  notion:       {uri:'https://notion.so',           name:'Notion',       icon:'📝', cat:'productivity',type:'web'},
-  trello:       {uri:'https://trello.com',          name:'Trello',       icon:'', cat:'productivity',type:'web'},
-  asana:        {uri:'https://asana.com',           name:'Asana',        icon:'✅', cat:'productivity',type:'web'},
-  slack:        {uri:'https://slack.com',           name:'Slack',        icon:'', cat:'productivity',type:'web'},
-  teams:        {uri:'https://teams.microsoft.com', name:'Teams',        icon:'', cat:'productivity',type:'web'},
-  zoom:         {uri:'https://zoom.us',             name:'Zoom',         icon:'', cat:'productivity',type:'web'},
-  gdocs:        {uri:'https://docs.google.com',     name:'Google Docs',  icon:'📄', cat:'productivity',type:'web'},
-  gsheet:       {uri:'https://sheets.google.com',   name:'Sheets',       icon:'', cat:'productivity',type:'web'},
-  gslide:       {uri:'https://slides.google.com',   name:'Slides',       icon:'️', cat:'productivity',type:'web'},
-  calendar:     {uri:'https://calendar.google.com', name:'Calendar',     icon:'📅', cat:'productivity',type:'web'},
-  keep:         {uri:'https://keep.google.com',     name:'Keep Notes',   icon:'🗒️', cat:'productivity',type:'web'},
-  evernote:     {uri:'https://evernote.com',        name:'Evernote',     icon:'', cat:'productivity',type:'web'},
-  figma:        {uri:'https://figma.com',           name:'Figma',        icon:'🎨', cat:'productivity',type:'web'},
-  canva:        {uri:'https://canva.com',           name:'Canva',        icon:'🖌️', cat:'productivity',type:'web'},
-
-  //  GAMING
-  steam:        {uri:'https://store.steampowered.com',name:'Steam',     icon:'🎮', cat:'gaming',    type:'web'},
-  epicgames:    {uri:'https://epicgames.com',       name:'Epic Games',   icon:'🏆', cat:'gaming',    type:'web'},
-  xbox:         {uri:'https://xbox.com',            name:'Xbox',         icon:'', cat:'gaming',    type:'web'},
-  playstation:  {uri:'https://playstation.com',     name:'PlayStation',  icon:'🎯', cat:'gaming',    type:'web'},
-  nintendo:     {uri:'https://nintendo.com',        name:'Nintendo',     icon:'🍄', cat:'gaming',    type:'web'},
-  roblox:       {uri:'https://roblox.com',          name:'Roblox',       icon:'', cat:'gaming',    type:'web'},
-  fortnite:     {uri:'https://fortnite.com',        name:'Fortnite',     icon:'🔫', cat:'gaming',    type:'web'},
-  league:       {uri:'https://leagueoflegends.com', name:'LoL',          icon:'⚔️', cat:'gaming',    type:'web'},
-  valorant:     {uri:'https://playvalorant.com',    name:'Valorant',     icon:'🎯', cat:'gaming',    type:'web'},
-  minecraft:    {uri:'https://minecraft.net',       name:'Minecraft',    icon:'⛏️', cat:'gaming',    type:'web'},
-
-  //  DEVELOPER TOOLS
-  github:       {uri:'https://github.com',          name:'GitHub',       icon:'🐙', cat:'dev',       type:'web'},
-  gitlab:       {uri:'https://gitlab.com',          name:'GitLab',       icon:'', cat:'dev',       type:'web'},
-  stackoverflow:{uri:'https://stackoverflow.com',   name:'Stack Overflow',icon:'📚', cat:'dev',      type:'web'},
-  vscode:       {uri:'https://code.visualstudio.com',name:'VS Code',    icon:'💻', cat:'dev',       type:'web'},
-  codepen:      {uri:'https://codepen.io',          name:'CodePen',      icon:'️', cat:'dev',       type:'web'},
-  replit:       {uri:'https://replit.com',          name:'Replit',       icon:'⚡', cat:'dev',       type:'web'},
-  npm:          {uri:'https://npmjs.com',           name:'npm',          icon:'📦', cat:'dev',       type:'web'},
-  pypi:         {uri:'https://pypi.org',            name:'PyPI',         icon:'🐍', cat:'dev',       type:'web'},
-  devto:        {uri:'https://dev.to',              name:'DEV.to',       icon:'👨‍💻', cat:'dev',       type:'web'},
-  hackernews:   {uri:'https://news.ycombinator.com',name:'Hacker News',  icon:'🟠', cat:'dev',       type:'web'},
-  postman:      {uri:'https://postman.com',         name:'Postman',      icon:'', cat:'dev',       type:'web'},
-  vercel:       {uri:'https://vercel.com',          name:'Vercel',       icon:'▲',  cat:'dev',       type:'web'},
-  netlify:      {uri:'https://netlify.com',         name:'Netlify',      icon:'', cat:'dev',       type:'web'},
-  heroku:       {uri:'https://heroku.com',          name:'Heroku',       icon:'☁️', cat:'dev',       type:'web'},
-  aws:          {uri:'https://aws.amazon.com',      name:'AWS',          icon:'🔶', cat:'dev',       type:'web'},
-  azure:        {uri:'https://azure.microsoft.com', name:'Azure',        icon:'🔷', cat:'dev',       type:'web'},
-  gcp:          {uri:'https://cloud.google.com',    name:'GCP',          icon:'🌥️', cat:'dev',       type:'web'},
-
-  //  NEWS & MEDIA
-  cnn:          {uri:'https://cnn.com',             name:'CNN',          icon:'📺', cat:'news',      type:'web'},
-  bbc:          {uri:'https://bbc.com',             name:'BBC',          icon:'📰', cat:'news',      type:'web'},
-  reuters:      {uri:'https://reuters.com',         name:'Reuters',      icon:'', cat:'news',      type:'web'},
-  nytimes:      {uri:'https://nytimes.com',         name:'NY Times',     icon:'🗽', cat:'news',      type:'web'},
-  techcrunch:   {uri:'https://techcrunch.com',      name:'TechCrunch',   icon:'', cat:'news',      type:'web'},
-  theverge:     {uri:'https://theverge.com',        name:'The Verge',    icon:'⚡', cat:'news',      type:'web'},
-  wired:        {uri:'https://wired.com',           name:'Wired',        icon:'', cat:'news',      type:'web'},
-  medium:       {uri:'https://medium.com',          name:'Medium',       icon:'️', cat:'news',      type:'web'},
-  substack:     {uri:'https://substack.com',        name:'Substack',     icon:'📰', cat:'news',      type:'web'},
-
-  // ️ TRAVEL & MAPS
-  maps:         {uri:'https://maps.google.com',     name:'Google Maps',  icon:'️', cat:'travel',    type:'web'},
-  uber:         {uri:'https://uber.com',            name:'Uber',         icon:'', cat:'travel',    type:'web'},
-  lyft:         {uri:'https://lyft.com',            name:'Lyft',         icon:'🚕', cat:'travel',    type:'web'},
-  airbnb:       {uri:'https://airbnb.com',          name:'Airbnb',       icon:'🏠', cat:'travel',    type:'web'},
-  booking:      {uri:'https://booking.com',         name:'Booking.com',  icon:'🏨', cat:'travel',    type:'web'},
-  tripadvisor:  {uri:'https://tripadvisor.com',     name:'TripAdvisor',  icon:'🦉', cat:'travel',    type:'web'},
-  expedia:      {uri:'https://expedia.com',         name:'Expedia',      icon:'️', cat:'travel',    type:'web'},
-  skyscanner:   {uri:'https://skyscanner.com',      name:'Skyscanner',   icon:'', cat:'travel',    type:'web'},
-
-  // 📚 LEARNING
-  wikipedia:    {uri:'https://wikipedia.org',       name:'Wikipedia',    icon:'📖', cat:'learning',  type:'web'},
-  coursera:     {uri:'https://coursera.org',        name:'Coursera',     icon:'', cat:'learning',  type:'web'},
-  udemy:        {uri:'https://udemy.com',           name:'Udemy',        icon:'📚', cat:'learning',  type:'web'},
-  khan:         {uri:'https://khanacademy.org',     name:'Khan Academy', icon:'🏫', cat:'learning',  type:'web'},
-  edx:          {uri:'https://edx.org',             name:'edX',          icon:'🎯', cat:'learning',  type:'web'},
-  skillshare:   {uri:'https://skillshare.com',      name:'Skillshare',   icon:'🎨', cat:'learning',  type:'web'},
-  duolingo:     {uri:'https://duolingo.com',        name:'Duolingo',     icon:'🦉', cat:'learning',  type:'web'},
-  youtubeedu:   {uri:'https://youtube.com/education',name:'YT Edu',     icon:'🎓', cat:'learning',  type:'web'},
-
-  // 💰 FINANCE
-  paypal:       {uri:'https://paypal.com',          name:'PayPal',       icon:'💳', cat:'finance',   type:'web'},
-  stripe:       {uri:'https://stripe.com',          name:'Stripe',       icon:'💰', cat:'finance',   type:'web'},
-  coinbase:     {uri:'https://coinbase.com',        name:'Coinbase',     icon:'🪙', cat:'finance',   type:'web'},
-  binance:      {uri:'https://binance.com',         name:'Binance',      icon:'', cat:'finance',   type:'web'},
-  robinhood:    {uri:'https://robinhood.com',       name:'Robinhood',    icon:'🏹', cat:'finance',   type:'web'},
-  yahoo_finance:{uri:'https://finance.yahoo.com',   name:'Yahoo Finance',icon:'📈', cat:'finance',   type:'web'},
-  bloomberg:    {uri:'https://bloomberg.com',       name:'Bloomberg',    icon:'📊', cat:'finance',   type:'web'},
-
-  // 🖥️ WINDOWS DESKTOP APPS
-  d_spotify:    {uri:'spotify:',                    name:'Spotify',      icon:'', cat:'desktop',   type:'desktop'},
-  d_discord:    {uri:'discord://',                  name:'Discord',      icon:'💬', cat:'desktop',   type:'desktop'},
-  d_vscode:     {uri:'vscode://',                   name:'VS Code',      icon:'💻', cat:'desktop',   type:'desktop'},
-  d_steam:      {uri:'steam://open/main',           name:'Steam',        icon:'🎮', cat:'desktop',   type:'desktop'},
-  d_telegram:   {uri:'tg://',                       name:'Telegram',     icon:'✈️', cat:'desktop',   type:'desktop'},
-  d_whatsapp:   {uri:'whatsapp://',                 name:'WhatsApp',     icon:'💚', cat:'desktop',   type:'desktop'},
-  d_zoom:       {uri:'zoommtg://',                  name:'Zoom',         icon:'📹', cat:'desktop',   type:'desktop'},
-  d_slack:      {uri:'slack://',                    name:'Slack',        icon:'', cat:'desktop',   type:'desktop'},
-  d_chrome:     {uri:'googlechrome://',             name:'Chrome',       icon:'', cat:'desktop',   type:'desktop'},
-  d_firefox:    {uri:'firefox://',                  name:'Firefox',      icon:'🦊', cat:'desktop',   type:'desktop'},
-  d_edge:       {uri:'microsoft-edge:',             name:'Edge',         icon:'🌊', cat:'desktop',   type:'desktop'},
-  d_opera:      {uri:'opera://',                    name:'Opera',        icon:'🔴', cat:'desktop',   type:'desktop'},
-  d_vlc:        {uri:'vlc://',                      name:'VLC Player',   icon:'️', cat:'desktop',   type:'desktop'},
-  d_obs:        {uri:'obs://',                      name:'OBS Studio',   icon:'📹', cat:'desktop',   type:'desktop'},
-  d_photoshop:  {uri:'photoshop://',                name:'Photoshop',    icon:'🎨', cat:'desktop',   type:'desktop'},
-  d_illustrator:{uri:'illustrator://',              name:'Illustrator',  icon:'✏️', cat:'desktop',   type:'desktop'},
-  d_premiere:   {uri:'adobepremierepro://',         name:'Premiere Pro', icon:'🎬', cat:'desktop',   type:'desktop'},
-  d_afterfx:    {uri:'aftereffects://',             name:'After Effects',icon:'✨', cat:'desktop',   type:'desktop'},
-  d_blender:    {uri:'blender://',                  name:'Blender',      icon:'🧊', cat:'desktop',   type:'desktop'},
-  d_unity:      {uri:'unity://',                    name:'Unity',        icon:'🎮', cat:'desktop',   type:'desktop'},
-  d_unreal:     {uri:'unreal://',                   name:'Unreal Engine',icon:'🔥', cat:'desktop',   type:'desktop'},
-  d_notepad:    {uri:'notepad://',                  name:'Notepad++',    icon:'📝', cat:'desktop',   type:'desktop'},
-  d_filezilla:  {uri:'filezilla://',                name:'FileZilla',    icon:'📤', cat:'desktop',   type:'desktop'},
-  d_winrar:     {uri:'winrar://',                   name:'WinRAR',       icon:'', cat:'desktop',   type:'desktop'},
-  d_7zip:       {uri:'7zip://',                     name:'7-Zip',        icon:'🗜️', cat:'desktop',   type:'desktop'},
-  d_gimp:       {uri:'gimp://',                     name:'GIMP',         icon:'🖌️', cat:'desktop',   type:'desktop'},
-  d_audacity:   {uri:'audacity://',                 name:'Audacity',     icon:'🎙️', cat:'desktop',   type:'desktop'},
-  d_handbrake:  {uri:'handbrake://',                name:'HandBrake',    icon:'🎥', cat:'desktop',   type:'desktop'},
-  d_libreoffice:{uri:'libreoffice://',              name:'LibreOffice',  icon:'📄', cat:'desktop',   type:'desktop'},
-  d_word:       {uri:'ms-word://',                  name:'Word',         icon:'📘', cat:'desktop',   type:'desktop'},
-  d_excel:      {uri:'ms-excel://',                 name:'Excel',        icon:'📗', cat:'desktop',   type:'desktop'},
-  d_powerpoint: {uri:'ms-powerpoint://',            name:'PowerPoint',   icon:'', cat:'desktop',   type:'desktop'},
-  d_onenote:    {uri:'onenote://',                  name:'OneNote',      icon:'📓', cat:'desktop',   type:'desktop'},
-  d_skype:      {uri:'skype://',                    name:'Skype',        icon:'📞', cat:'desktop',   type:'desktop'},
-  d_signal:     {uri:'signal://',                   name:'Signal',       icon:'🔐', cat:'desktop',   type:'desktop'},
-  d_davinci:    {uri:'davinci://',                  name:'DaVinci Resolve',icon:'', cat:'desktop', type:'desktop'},
-  d_autodesk:   {uri:'autodesk://',                 name:'AutoCAD',      icon:'📐', cat:'desktop',   type:'desktop'},
-  d_maya:       {uri:'maya://',                     name:'Maya',         icon:'🎭', cat:'desktop',   type:'desktop'},
-  d_cinema4d:   {uri:'cinema4d://',                 name:'Cinema 4D',    icon:'🎪', cat:'desktop',   type:'desktop'},
-  d_figma_d:    {uri:'figma://',                    name:'Figma Desktop',icon:'🎨', cat:'desktop',   type:'desktop'},
-  d_notion_d:   {uri:'notion://',                   name:'Notion App',   icon:'📝', cat:'desktop',   type:'desktop'},
-  d_todoist:    {uri:'todoist://',                  name:'Todoist',      icon:'✅', cat:'desktop',   type:'desktop'},
-  d_1password:  {uri:'1password://',                name:'1Password',    icon:'', cat:'desktop',   type:'desktop'},
-  d_bitwarden:  {uri:'bitwarden://',                name:'Bitwarden',    icon:'🛡️', cat:'desktop',   type:'desktop'},
-  d_calculator: {uri:'calculator://',               name:'Calculator',   icon:'🧮', cat:'desktop',   type:'desktop'},
-  d_snipping:   {uri:'snippingtool://',             name:'Snipping Tool',icon:'✂️', cat:'desktop',   type:'desktop'},
-  d_paint:      {uri:'mspaint://',                  name:'Paint',        icon:'🎨', cat:'desktop',   type:'desktop'},
-  d_explorer:   {uri:'explorer://',                 name:'File Explorer',icon:'📁', cat:'desktop',   type:'desktop'},
-  d_settings:   {uri:'ms-settings://',              name:'Settings',     icon:'⚙️', cat:'desktop',   type:'desktop'},
-  d_store:      {uri:'ms-windows-store://',         name:'MS Store',     icon:'️', cat:'desktop',   type:'desktop'},
-  d_taskmgr:    {uri:'taskmgr://',                  name:'Task Manager', icon:'📊', cat:'desktop',   type:'desktop'},
-  d_cmd:        {uri:'cmd://',                      name:'Command Prompt',icon:'⌨️', cat:'desktop',  type:'desktop'},
-  d_powershell: {uri:'powershell://',               name:'PowerShell',   icon:'💻', cat:'desktop',   type:'desktop'},
-  d_terminal:   {uri:'wt://',                       name:'Terminal',     icon:'🖥️', cat:'desktop',   type:'desktop'},
-  d_notepad_w:  {uri:'notepad://',                  name:'Notepad',      icon:'', cat:'desktop',   type:'desktop'},
-  d_wordpad:    {uri:'wordpad://',                  name:'WordPad',      icon:'📄', cat:'desktop',   type:'desktop'},
-  d_msn:        {uri:'msn://',                      name:'MSN',          icon:'📰', cat:'desktop',   type:'desktop'},
-  d_weather:    {uri:'bingweather://',              name:'Weather',      icon:'🌤️', cat:'desktop',   type:'desktop'},
-  d_photos:     {uri:'ms-photos://',                name:'Photos',       icon:'🖼️', cat:'desktop',   type:'desktop'},
-  d_camera:     {uri:'microsoft-camera://',         name:'Camera',       icon:'', cat:'desktop',   type:'desktop'},
-  d_maps_d:     {uri:'bingmaps://',                 name:'Maps',         icon:'🗺️', cat:'desktop',   type:'desktop'},
-  d_calendar_d: {uri:'outlookcal://',               name:'Calendar',     icon:'📅', cat:'desktop',   type:'desktop'},
-  d_mail_d:     {uri:'outlookmail://',              name:'Mail',         icon:'', cat:'desktop',   type:'desktop'},
-  d_xbox_app:   {uri:'xbox://',                     name:'Xbox App',     icon:'🎮', cat:'desktop',   type:'desktop'},
-  d_gamepass:   {uri:'gamepass://',                 name:'Game Pass',    icon:'🏆', cat:'desktop',   type:'desktop'},
-  d_clipchamp:  {uri:'clipchamp://',                name:'Clipchamp',    icon:'🎬', cat:'desktop',   type:'desktop'},
-  d_teams_d:    {uri:'msteams://',                  name:'Teams',        icon:'', cat:'desktop',   type:'desktop'},
-  d_onedrive_d: {uri:'onedrive://',                 name:'OneDrive',     icon:'☁️', cat:'desktop',   type:'desktop'},
-  d_sharepoint: {uri:'sharepoint://',               name:'SharePoint',   icon:'🔗', cat:'desktop',   type:'desktop'},
-  d_powerbi:    {uri:'powerbi://',                  name:'Power BI',     icon:'', cat:'desktop',   type:'desktop'},
-  d_visio:      {uri:'visio://',                    name:'Visio',        icon:'📐', cat:'desktop',   type:'desktop'},
-  d_publisher:  {uri:'publisher://',                name:'Publisher',    icon:'📰', cat:'desktop',   type:'desktop'},
-  d_access:     {uri:'access://',                   name:'Access',       icon:'🗄️', cat:'desktop',   type:'desktop'},
-  d_project:    {uri:'project://',                  name:'Project',      icon:'📋', cat:'desktop',   type:'desktop'},
-  d_defender:   {uri:'windowsdefender://',          name:'Defender',     icon:'🛡️', cat:'desktop',   type:'desktop'},
-  d_control:    {uri:'control://',                  name:'Control Panel',icon:'️', cat:'desktop',   type:'desktop'},
-  d_regedit:    {uri:'regedit://',                  name:'Regedit',      icon:'🗃️', cat:'desktop',   type:'desktop'},
-  d_services:   {uri:'services://',                 name:'Services',     icon:'🔧', cat:'desktop',   type:'desktop'},
-  d_eventvwr:   {uri:'eventvwr://',                 name:'Event Viewer', icon:'📋', cat:'desktop',   type:'desktop'},
-  d_perfmon:    {uri:'perfmon://',                  name:'Perf Monitor', icon:'📈', cat:'desktop',   type:'desktop'},
-  d_sysinfo:    {uri:'msinfo32://',                 name:'System Info',  icon:'ℹ️', cat:'desktop',   type:'desktop'},
-  d_dxdiag:     {uri:'dxdiag://',                   name:'DX Diagnostic',icon:'', cat:'desktop',   type:'desktop'},
-  d_charmap:    {uri:'charmap://',                  name:'Character Map',icon:'🔤', cat:'desktop',   type:'desktop'},
-  d_stickynotes:{uri:'stickynotes://',              name:'Sticky Notes', icon:'📌', cat:'desktop',   type:'desktop'},
-  d_alarms:     {uri:'ms-clock://',                 name:'Alarms',       icon:'⏰', cat:'desktop',   type:'desktop'},
-  d_voice:      {uri:'windowsvoice://',             name:'Voice Recorder',icon:'🎙️', cat:'desktop',  type:'desktop'},
-  d_movies:     {uri:'zune://',                     name:'Movies & TV',  icon:'🎬', cat:'desktop',   type:'desktop'},
-  d_groove:     {uri:'zune://',                     name:'Groove Music', icon:'🎵', cat:'desktop',   type:'desktop'},
-  d_feedback:   {uri:'feedback://',                 name:'Feedback Hub', icon:'💬', cat:'desktop',   type:'desktop'},
-  d_tips:       {uri:'getstarted://',               name:'Tips',         icon:'💡', cat:'desktop',   type:'desktop'},
-  d_people:     {uri:'ms-people://',                name:'People',       icon:'👥', cat:'desktop',   type:'desktop'},
-  d_phone:      {uri:'ms-phone://',                 name:'Phone Link',   icon:'', cat:'desktop',   type:'desktop'},
-  d_yourphone:  {uri:'yourphone://',                name:'Your Phone',   icon:'📲', cat:'desktop',   type:'desktop'},
-};
-
-/* ==================== CATEGORIES ==================== */
-const CATEGORIES = {
-  search:       {name:'Search Engines',  icon:'🔍', class:'cat-search'},
-  ai:           {name:'AI Tools',        icon:'', class:'cat-ai'},
-  social:       {name:'Social Media',    icon:'📱', class:'cat-social'},
-  streaming:    {name:'Streaming & Music',icon:'🎬', class:'cat-streaming'},
-  shopping:     {name:'Shopping',        icon:'🛍️', class:'cat-shopping'},
-  productivity: {name:'Productivity',    icon:'💼', class:'cat-productivity'},
-  gaming:       {name:'Gaming',          icon:'', class:'cat-gaming'},
-  dev:          {name:'Developer Tools', icon:'', class:'cat-dev'},
-  news:         {name:'News & Media',    icon:'', class:'cat-news'},
-  travel:       {name:'Travel & Maps',   icon:'️', class:'cat-travel'},
-  learning:     {name:'Learning',        icon:'', class:'cat-learning'},
-  finance:      {name:'Finance',         icon:'', class:'cat-finance'},
-  desktop:      {name:'Windows Desktop Apps',icon:'🖥️', class:'cat-desktop'},
-};
-
-/* ==================== STATE ==================== */
-let mode = null, peer = null, conn = null;
-let autoSync = false, phoneAutoSync = true;
-let connectMethod = 'qr', btDevice = null;
-let scanner = null, isScanning = false;
-let bluetoothName = 'SYNCFLOW-' + generateShortCode();
-
-/* ==================== MODE SELECTION ==================== */
-function selectMode(m) {
-  mode = m;
-  document.getElementById('modeSelect').classList.add('hidden');
-  document.getElementById(m + 'Mode').classList.remove('hidden');
-  document.getElementById('launcherSection').classList.remove('hidden');
+const APPS = [
+  // Search & AI
+  { name:"Google", ico:"🔍", cmd:"https://www.google.com/", cat:"search" },
+  { name:"Bing", ico:"🅱️", cmd:"https://www.bing.com/", cat:"search" },
+  { name:"ChatGPT", ico:"🤖", cmd:"https://chat.openai.com/", cat:"ai" },
+  { name:"Claude", ico:"🧠", cmd:"https://claude.ai/", cat:"ai" },
+  { name:"Perplexity", ico:"🔮", cmd:"https://www.perplexity.ai/", cat:"ai" },
+  { name:"Gemini", ico:"✨", cmd:"https://gemini.google.com/", cat:"ai" },
+  { name:"Copilot", ico:"🚀", cmd:"https://copilot.microsoft.com/", cat:"ai" },
   
-  buildLauncherGrid();
+  // Social Media
+  { name:"TikTok", ico:"🎵", cmd:"tiktok://", url:"https://www.tiktok.com/", cat:"social" },
+  { name:"YouTube", ico:"▶️", cmd:"https://www.youtube.com/", cat:"video" },
+  { name:"Instagram", ico:"📸", cmd:"instagram://", url:"https://www.instagram.com/", cat:"social" },
+  { name:"Twitter/X", ico:"🐦", cmd:"x://", url:"https://x.com/", cat:"social" },
+  { name:"Facebook", ico:"👤", cmd:"fb://", url:"https://www.facebook.com/", cat:"social" },
+  { name:"LinkedIn", ico:"💼", cmd:"linkedin://", url:"https://www.linkedin.com/", cat:"social" },
+  { name:"Reddit", ico:"👽", cmd:"https://www.reddit.com/", cat:"social" },
+  { name:"Pinterest", ico:"📌", cmd:"pinterest://", url:"https://www.pinterest.com/", cat:"social" },
+  { name:"Snapchat", ico:"👻", cmd:"snapchat://", url:"https://www.snapchat.com/", cat:"social" },
+  { name:"Threads", ico:"🧵", cmd:"https://www.threads.net/", cat:"social" },
+  { name:"Mastodon", ico:"🐘", cmd:"https://mastodon.social/", cat:"social" },
   
-  if (m === 'laptop') initLaptop();
-  else initPhone();
-}
+  // Video & Streaming
+  { name:"Netflix", ico:"🎬", cmd:"https://www.netflix.com/", cat:"video" },
+  { name:"Disney+", ico:"🏰", cmd:"https://www.disneyplus.com/", cat:"video" },
+  { name:"Prime Video", ico:"📺", cmd:"https://www.primevideo.com/", cat:"video" },
+  { name:"Hulu", ico:"📡", cmd:"https://www.hulu.com/", cat:"video" },
+  { name:"Twitch", ico:"🎮", cmd:"twitch://", url:"https://www.twitch.tv/", cat:"video" },
+  { name:"HBO Max", ico:"🎭", cmd:"https://www.max.com/", cat:"video" },
+  { name:"Crunchyroll", ico:"🍥", cmd:"https://www.crunchyroll.com/", cat:"video" },
+  { name:"Vimeo", ico:"🎥", cmd:"https://vimeo.com/", cat:"video" },
+  
+  // Music
+  { name:"Spotify", ico:"🎧", cmd:"spotify:", url:"https://open.spotify.com/", cat:"music" },
+  { name:"Apple Music", ico:"🎵", cmd:"music://", url:"https://music.apple.com/", cat:"music" },
+  { name:"SoundCloud", ico:"☁️", cmd:"https://soundcloud.com/", cat:"music" },
+  { name:"YouTube Music", ico:"🎶", cmd:"https://music.youtube.com/", cat:"music" },
+  { name:"Tidal", ico:"🌊", cmd:"https://tidal.com/", cat:"music" },
+  { name:"Deezer", ico:"🎼", cmd:"https://www.deezer.com/", cat:"music" },
+  
+  // Communication
+  { name:"WhatsApp", ico:"💬", cmd:"whatsapp://", url:"https://web.whatsapp.com/", cat:"chat" },
+  { name:"Telegram", ico:"✈️", cmd:"tg://", url:"https://web.telegram.org/", cat:"chat" },
+  { name:"Discord", ico:"🎮", cmd:"discord://", url:"https://discord.com/app", cat:"chat" },
+  { name:"Slack", ico:"💼", cmd:"slack://", url:"https://slack.com/", cat:"chat" },
+  { name:"Teams", ico:"👥", cmd:"msteams://", url:"https://teams.microsoft.com/", cat:"chat" },
+  { name:"Signal", ico:"🔒", cmd:"sgnl://", url:"https://signal.org/", cat:"chat" },
+  { name:"Zoom", ico:"📹", cmd:"zoomus://", url:"https://zoom.us/", cat:"chat" },
+  { name:"Skype", ico:"☁️", cmd:"skype:", url:"https://www.skype.com/", cat:"chat" },
+  { name:"Messenger", ico:"💭", cmd:"fb-messenger://", url:"https://www.messenger.com/", cat:"chat" },
+  
+  // Email
+  { name:"Gmail", ico:"📧", cmd:"https://mail.google.com/", cat:"email" },
+  { name:"Outlook", ico:"📬", cmd:"ms-outlook://", url:"https://outlook.live.com/", cat:"email" },
+  { name:"ProtonMail", ico:"🔐", cmd:"https://mail.proton.me/", cat:"email" },
+  { name:"Yahoo Mail", ico:"📮", cmd:"https://mail.yahoo.com/", cat:"email" },
+  
+  // Productivity
+  { name:"Notion", ico:"📝", cmd:"notion://", url:"https://www.notion.so/", cat:"productivity" },
+  { name:"Google Drive", ico:"📁", cmd:"https://drive.google.com/", cat:"productivity" },
+  { name:"Dropbox", ico:"📦", cmd:"https://www.dropbox.com/", cat:"productivity" },
+  { name:"OneDrive", ico:"☁️", cmd:"https://onedrive.live.com/", cat:"productivity" },
+  { name:"Obsidian", ico:"💎", cmd:"obsidian://", url:"https://obsidian.md/", cat:"productivity" },
+  { name:"Evernote", ico:"🐘", cmd:"evernote://", url:"https://evernote.com/", cat:"productivity" },
+  { name:"Todoist", ico:"✅", cmd:"https://todoist.com/", cat:"productivity" },
+  { name:"Trello", ico:"📋", cmd:"https://trello.com/", cat:"productivity" },
+  { name:"Asana", ico:"🎯", cmd:"https://asana.com/", cat:"productivity" },
+  
+  // Development
+  { name:"GitHub", ico:"🐙", cmd:"https://github.com/", cat:"dev" },
+  { name:"GitLab", ico:"🦊", cmd:"https://gitlab.com/", cat:"dev" },
+  { name:"VS Code", ico:"💻", cmd:"vscode://", cat:"dev" },
+  { name:"Stack Overflow", ico:"📚", cmd:"https://stackoverflow.com/", cat:"dev" },
+  { name:"CodePen", ico:"✏️", cmd:"https://codepen.io/", cat:"dev" },
+  { name:"Dev.to", ico:"👨‍💻", cmd:"https://dev.to/", cat:"dev" },
+  { name:"npm", ico:"📦", cmd:"https://www.npmjs.com/", cat:"dev" },
+  { name:"Docker Hub", ico:"🐳", cmd:"https://hub.docker.com/", cat:"dev" },
+  
+  // Shopping
+  { name:"Amazon", ico:"📦", cmd:"https://www.amazon.com/", cat:"shopping" },
+  { name:"eBay", ico:"🏷️", cmd:"https://www.ebay.com/", cat:"shopping" },
+  { name:"Etsy", ico:"🎨", cmd:"https://www.etsy.com/", cat:"shopping" },
+  { name:"Walmart", ico:"🛒", cmd:"https://www.walmart.com/", cat:"shopping" },
+  { name:"AliExpress", ico:"🌏", cmd:"https://www.aliexpress.com/", cat:"shopping" },
+  
+  // News & Info
+  { name:"Wikipedia", ico:"📖", cmd:"https://www.wikipedia.org/", cat:"news" },
+  { name:"Medium", ico:"📰", cmd:"https://medium.com/", cat:"news" },
+  { name:"CNN", ico:"📺", cmd:"https://www.cnn.com/", cat:"news" },
+  { name:"BBC", ico:"🇬🇧", cmd:"https://www.bbc.com/", cat:"news" },
+  { name:"NYT", ico:"📰", cmd:"https://www.nytimes.com/", cat:"news" },
+  { name:"Reddit News", ico:"📡", cmd:"https://www.reddit.com/r/news/", cat:"news" },
+  
+  // Gaming
+  { name:"Steam", ico:"🎮", cmd:"steam://open/main", cat:"gaming" },
+  { name:"Epic Games", ico:"🎯", cmd:"com.epicgames.launcher://", url:"https://www.epicgames.com/", cat:"gaming" },
+  { name:"Xbox", ico:"🟢", cmd:"xbox://", url:"https://www.xbox.com/", cat:"gaming" },
+  { name:"PlayStation", ico:"🎮", cmd:"https://www.playstation.com/", cat:"gaming" },
+  { name:"Nintendo", ico:"🍄", cmd:"https://www.nintendo.com/", cat:"gaming" },
+  
+  // Maps & Travel
+  { name:"Google Maps", ico:"🗺️", cmd:"https://maps.google.com/", cat:"maps" },
+  { name:"Waze", ico:"🚗", cmd:"waze://", url:"https://www.waze.com/", cat:"maps" },
+  { name:"Airbnb", ico:"🏠", cmd:"https://www.airbnb.com/", cat:"maps" },
+  { name:"Booking", ico:"🏨", cmd:"https://www.booking.com/", cat:"maps" },
+  
+  // Windows Apps
+  { name:"Calculator", ico:"🧮", cmd:"calculator:", cat:"windows" },
+  { name:"Settings", ico:"⚙️", cmd:"ms-settings:", cat:"windows" },
+  { name:"File Explorer", ico:"📂", cmd:"explorer:", cat:"windows" },
+  { name:"Snipping Tool", ico:"✂️", cmd:"screenclip:", cat:"windows" },
+  { name:"Photos", ico:"🖼️", cmd:"ms-photos:", cat:"windows" },
+  { name:"Paint", ico:"🎨", cmd:"ms-paint:", cat:"windows" },
+  { name:"Clock", ico:"⏰", cmd:"ms-clock:", cat:"windows" },
+  { name:"Weather", ico:"🌤️", cmd:"bingweather:", cat:"windows" },
+  { name:"Store", ico:"🛍️", cmd:"ms-windows-store:", cat:"windows" },
+  { name:"Word", ico:"📝", cmd:"ms-word:", cat:"windows" },
+  { name:"Excel", ico:"📊", cmd:"ms-excel:", cat:"windows" },
+  { name:"PowerPoint", ico:"📽️", cmd:"ms-powerpoint:", cat:"windows" },
+  { name:"OneNote", ico:"📓", cmd:"onenote:", cat:"windows" },
+  { name:"Edge", ico:"🌐", cmd:"microsoft-edge:", cat:"windows" },
+  { name:"Chrome", ico:"🌐", cmd:"googlechrome:", cat:"windows" },
+  { name:"Firefox", ico:"🦊", cmd:"firefox:", cat:"windows" },
+  { name:"VLC", ico:"🎬", cmd:"vlc://", cat:"windows" },
+];
 
-/* ==================== LAUNCHER GRID ==================== */
-function buildLauncherGrid() {
-  const container = document.getElementById('launcherGrid');
-  container.innerHTML = '';
+const CATEGORIES = [
+  { id:"all", name:"All", icon:"🌟" },
+  { id:"search", name:"Search", icon:"🔍" },
+  { id:"ai", name:"AI", icon:"🤖" },
+  { id:"social", name:"Social", icon:"👥" },
+  { id:"video", name:"Video", icon:"▶️" },
+  { id:"music", name:"Music", icon:"🎵" },
+  { id:"chat", name:"Chat", icon:"💬" },
+  { id:"email", name:"Email", icon:"📧" },
+  { id:"productivity", name:"Work", icon:"💼" },
+  { id:"dev", name:"Dev", icon:"💻" },
+  { id:"shopping", name:"Shop", icon:"🛒" },
+  { id:"news", name:"News", icon:"📰" },
+  { id:"gaming", name:"Games", icon:"🎮" },
+  { id:"maps", name:"Maps", icon:"🗺️" },
+  { id:"windows", name:"Windows", icon:"🪟" },
+];
+
+let role = null;
+let peer = null;
+let conn = null;
+let roomCode = null;
+let waitInterval = null;
+let clipboardMonitor = null;
+let lastClipboard = '';
+let currentCategory = 'all';
+
+const $ = id => document.getElementById(id);
+
+/* ---------- Initialize ---------- */
+window.addEventListener('DOMContentLoaded', () => {
+  buildCategoryTabs();
+  buildAppGrid();
+  setupClipboardMonitor();
+  setupShareTarget();
+  setupSearch();
   
-  for (const [catKey, catInfo] of Object.entries(CATEGORIES)) {
-    const appsInCat = Object.entries(APPS).filter(([_, app]) => app.cat === catKey);
-    if (appsInCat.length === 0) continue;
-    
-    const catDiv = document.createElement('div');
-    catDiv.className = `category ${catInfo.class}`;
-    catDiv.dataset.category = catKey;
-    
-    catDiv.innerHTML = `
-      <div class="category-header">
-        <div class="category-icon">${catInfo.icon}</div>
-        <div class="category-title">${catInfo.name}</div>
-        <div class="category-count">${appsInCat.length} apps</div>
-      </div>
-      <div class="app-grid" id="grid-${catKey}"></div>
-    `;
-    
-    container.appendChild(catDiv);
-    
-    const grid = catDiv.querySelector('.app-grid');
-    appsInCat.forEach(([key, app]) => {
-      const card = document.createElement('div');
-      card.className = 'app-card';
-      card.dataset.name = app.name.toLowerCase();
-      card.dataset.key = key;
-      card.innerHTML = `
-        <span class="app-type ${app.type}">${app.type === 'desktop' ? 'APP' : 'WEB'}</span>
-        <span class="app-icon">${app.icon}</span>
-        <div class="app-name">${app.name}</div>
-      `;
-      card.onclick = () => launchApp(key);
-      grid.appendChild(card);
-    });
+  const urlParams = new URLSearchParams(window.location.search);
+  const qrRoom = urlParams.get('room');
+  
+  if(qrRoom){
+    role = 'phone';
+    roomCode = qrRoom;
+    connectAsPhone();
   }
-}
+});
 
-function launchApp(key) {
-  const app = APPS[key];
-  if (!app) return;
-  
-  // Visual feedback
-  flash();
-  
-  // Log
-  const logMsg = `🚀 Launching: ${app.name}`;
-  if (mode === 'laptop') logLaptop(logMsg, 'success');
-  else logPhone(logMsg, 'success');
-  
-  // Send to other device
-  if (conn && conn.open) {
-    conn.send({ type: app.type, payload: app.uri, name: app.name });
-  }
-  
-  // Open locally
-  openContent(app.uri, app.type);
-}
-
-function filterApps() {
-  const query = document.getElementById('searchInput').value.toLowerCase().trim();
-  const cards = document.querySelectorAll('.app-card');
-  const categories = document.querySelectorAll('.category');
-  
-  cards.forEach(card => {
-    const name = card.dataset.name;
-    const match = !query || name.includes(query);
-    card.style.display = match ? '' : 'none';
-  });
-  
-  categories.forEach(cat => {
-    const visibleCards = cat.querySelectorAll('.app-card[style=""], .app-card:not([style])');
-    const hasVisible = Array.from(cat.querySelectorAll('.app-card')).some(c => c.style.display !== 'none');
-    cat.style.display = hasVisible ? '' : 'none';
+/* ---------- Category Tabs ---------- */
+function buildCategoryTabs(){
+  const tabs = $('categoryTabs');
+  CATEGORIES.forEach(cat => {
+    const el = document.createElement('div');
+    el.className = 'tab' + (cat.id === 'all' ? ' active' : '');
+    el.textContent = `${cat.icon} ${cat.name}`;
+    el.onclick = () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+      currentCategory = cat.id;
+      buildAppGrid();
+    };
+    tabs.appendChild(el);
   });
 }
 
-/* ==================== LAPTOP ==================== */
-function initLaptop() {
-  const code = generateCode();
-  document.getElementById('roomCode').textContent = code;
-  document.getElementById('btDeviceName').textContent = bluetoothName;
-  logLaptop('Room code: ' + code, 'info');
+/* ---------- Search ---------- */
+function setupSearch(){
+  $('searchInput').addEventListener('input', e => {
+    buildAppGrid(e.target.value.toLowerCase());
+  });
+}
+
+/* ---------- App Grid ---------- */
+function buildAppGrid(searchTerm = ''){
+  const grid = $('appGrid');
+  grid.innerHTML = '';
   
-  document.getElementById('qrcode').innerHTML = '';
-  const qrData = window.location.origin + window.location.pathname + '?connect=' + code;
-  new QRCode(document.getElementById('qrcode'), {
-    text: qrData, width: 220, height: 220,
-    colorDark: '#000000', colorLight: '#ffffff',
+  let filtered = APPS;
+  
+  if(currentCategory !== 'all'){
+    filtered = filtered.filter(a => a.cat === currentCategory);
+  }
+  
+  if(searchTerm){
+    filtered = filtered.filter(a => 
+      a.name.toLowerCase().includes(searchTerm) ||
+      a.cmd.toLowerCase().includes(searchTerm)
+    );
+  }
+  
+  filtered.forEach(a => {
+    const el = document.createElement('div');
+    el.className = 'app';
+    el.innerHTML = `<span class="ico">${a.ico}</span><span class="nm">${a.name}</span>`;
+    el.onclick = () => sendCommand(a.cmd, a.name);
+    grid.appendChild(el);
+  });
+  
+  if(filtered.length === 0){
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)">No apps found</div>';
+  }
+}
+
+/* ---------- Connection Workflow ---------- */
+$('startLaptop').onclick = () => startAsLaptop();
+$('startPhone').onclick = () => {
+  $('manualConnect').classList.remove('hidden');
+  $('startPhone').classList.add('hidden');
+};
+$('connectBtn').onclick = () => {
+  const code = $('roomInput').value.trim().toLowerCase();
+  if(!code){ showToast('Enter room code', true); return; }
+  roomCode = code;
+  connectAsPhone();
+};
+
+function startAsLaptop(){
+  role = 'laptop';
+  roomCode = generateRoomCode();
+  
+  $('step1').classList.add('completed');
+  $('step2').classList.remove('hidden');
+  $('step2').classList.add('active');
+  $('startLaptop').disabled = true;
+  $('startLaptop').textContent = '✓ Laptop Ready';
+  
+  const connectUrl = `${window.location.origin}${window.location.pathname}?room=${roomCode}`;
+  generateQR(connectUrl);
+  $('roomDisplay').textContent = roomCode;
+  
+  initPeerAsHost();
+  
+  let seconds = 0;
+  waitInterval = setInterval(() => {
+    seconds++;
+    $('waitTimer').textContent = seconds + 's';
+  }, 1000);
+  
+  showToast('QR code ready! Scan with your phone');
+}
+
+function connectAsPhone(){
+  role = 'phone';
+  
+  $('step3').classList.add('completed');
+  $('setup').classList.add('hidden');
+  $('phoneUI').classList.remove('hidden');
+  
+  initPeerAsGuest();
+}
+
+function generateRoomCode(){
+  return Math.random().toString(36).substring(2, 8).toUpperCase();
+}
+
+function generateQR(text){
+  $('qrcode').innerHTML = '';
+  new QRCode($('qrcode'), {
+    text: text,
+    width: 240,
+    height: 240,
+    colorDark: "#000000",
+    colorLight: "#ffffff",
     correctLevel: QRCode.CorrectLevel.H
   });
-  logLaptop('✅ QR code generated', 'success');
+}
+
+/* ---------- PeerJS Connection ---------- */
+function initPeerAsHost(){
+  const peerId = 'instantapp-' + roomCode + '-host';
   
-  initPeerJS(code);
-}
-
-function setConnectMethod(method) {
-  connectMethod = method;
-  document.getElementById('btnQR').classList.toggle('active', method === 'qr');
-  document.getElementById('btnBT').classList.toggle('active', method === 'bluetooth');
-  document.getElementById('qrMethod').classList.toggle('hidden', method !== 'qr');
-  document.getElementById('btMethod').classList.toggle('hidden', method !== 'bluetooth');
-  document.getElementById('connBadge').textContent = method === 'bluetooth' ? 'BT' : 'P2P';
-  document.getElementById('connBadge').className = 'badge ' + (method === 'bluetooth' ? 'bt' : 'p2p');
-}
-
-function initPeerJS(code) {
-  peer = new Peer('syncflow-' + code, {
-    debug: 1,
-    config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] }
-  });
+  peer = new Peer(peerId, { debug: 2 });
+  
   peer.on('open', id => {
-    logLaptop('P2P ready: ' + id, 'success');
-    updateLaptopStatus('connecting', 'Waiting for phone...', 'P2P');
+    log('Laptop ready. Room: ' + roomCode, 'ok');
+    updateStatus('waiting', 'Waiting for phone...');
   });
+  
   peer.on('connection', c => {
-    conn = c;
-    setupConnection();
-    updateLaptopStatus('connected', 'Phone connected!', 'P2P');
-    logLaptop('✅ Phone connected', 'success');
+    attachConnection(c);
   });
-  peer.on('error', err => logLaptop('Error: ' + err.type, 'error'));
+  
+  peer.on('error', err => {
+    log('Error: ' + err.type, 'err');
+    if(err.type === 'unavailable-id'){
+      log('Room already in use. Try refreshing.', 'err');
+    }
+  });
 }
 
-async function startBluetoothDiscovery() {
-  if (!navigator.bluetooth) {
-    alert('Bluetooth not supported. Use Chrome/Edge.');
+function initPeerAsGuest(){
+  const peerId = 'instantapp-' + roomCode + '-guest';
+  const hostId = 'instantapp-' + roomCode + '-host';
+  
+  peer = new Peer(peerId, { debug: 2 });
+  
+  peer.on('open', id => {
+    log('Connecting to laptop...', 'ok');
+    updateStatus('waiting', 'Connecting...');
+    
+    const c = peer.connect(hostId, { reliable: true });
+    attachConnection(c);
+  });
+  
+  peer.on('error', err => {
+    log('Error: ' + err.type, 'err');
+    if(err.type === 'peer-unavailable'){
+      updateStatus('disconnected', 'Laptop not found. Is it open?');
+      showToast('Laptop not found. Check room code.', true);
+    }
+  });
+}
+
+function attachConnection(c){
+  conn = c;
+  
+  conn.on('open', () => {
+    if(waitInterval) clearInterval(waitInterval);
+    
+    $('step2').classList.add('completed');
+    $('step2').classList.remove('active');
+    
+    if(role === 'laptop'){
+      $('step2').classList.add('hidden');
+      $('laptopUI').classList.remove('hidden');
+      log('✓ Phone connected!', 'ok');
+    } else {
+      log('✓ Connected to laptop!', 'ok');
+    }
+    
+    updateStatus('connected', 'Connected');
+    showToast('Connected! Ready to send links');
+    beep(880, 60);
+  });
+  
+  conn.on('data', data => {
+    if(role === 'laptop'){
+      log(`← ${data.name}: ${data.cmd}`, 'ok');
+      openOnLaptop(data.cmd, data.name);
+      showToast('Opened: ' + data.name);
+      beep(660, 40);
+    }
+  });
+  
+  conn.on('close', () => {
+    updateStatus('disconnected', 'Disconnected');
+    log('Connection closed', 'warn');
+    conn = null;
+    
+    if(role === 'phone'){
+      setTimeout(() => {
+        log('Reconnecting...', 'warn');
+        initPeerAsGuest();
+      }, 2000);
+    }
+  });
+  
+  conn.on('error', err => {
+    log('Connection error: ' + err, 'err');
+  });
+}
+
+/* ---------- Send Functions ---------- */
+function sendCommand(cmd, name){
+  if(!conn || !conn.open){
+    showToast('Not connected!', true);
     return;
   }
-  try {
-    logLaptop('Scanning Bluetooth...', 'info');
-    updateLaptopStatus('connecting', 'Scanning...', 'BT');
-    const device = await navigator.bluetooth.requestDevice({
-      acceptAllDevices: true,
-      optionalServices: ['battery_service', 'device_information', 'generic_access']
-    });
-    btDevice = device;
-    const name = device.name || 'Bluetooth Device';
-    logLaptop(`✅ Found: ${name}`, 'success');
-    displayBTDevice(name, device.id, 'laptop');
-    const server = await device.gatt.connect();
-    logLaptop('✅ GATT connected', 'success');
-    updateLaptopStatus('connected', `Connected: ${name}`, 'BT');
-  } catch (error) {
-    if (error.name !== 'NotFoundError') logLaptop('BT error: ' + error.message, 'error');
+  
+  conn.send({ cmd, name, t: Date.now() });
+  
+  if(navigator.vibrate) navigator.vibrate(30);
+  beep(660, 40);
+  showToast('Sent: ' + name);
+}
+
+function sendCurrentPage(){
+  const url = window.location.href;
+  sendCommand(url, 'Current Page');
+}
+
+async function shareCurrentPage(){
+  if(navigator.share){
+    try {
+      await navigator.share({
+        title: 'Open on Laptop',
+        url: window.location.href
+      });
+    } catch(e){
+      if(e.name !== 'AbortError') console.error(e);
+    }
+  } else {
+    sendCurrentPage();
   }
 }
 
-function advertiseBluetooth() {
-  alert(`🔵 Bluetooth Device Name:\n\n${bluetoothName}\n\nOn your phone:\n1. Open Bluetooth settings\n2. Look for "${bluetoothName}"\n3. Tap to pair\n\nNote: Full BT advertising requires native app.`);
+function showCustomInput(){
+  $('customInputSection').classList.toggle('hidden');
+  $('customUrl').focus();
 }
 
-function displayBTDevice(name, id, target) {
-  const container = target === 'laptop' ? 
-    document.getElementById('btDeviceList') : 
-    document.getElementById('btPhoneDeviceList');
-  const div = document.createElement('div');
-  div.className = 'bt-device';
-  div.innerHTML = `
-    <div class="bt-device-icon">${getDeviceIcon(name)}</div>
-    <div style="flex:1">
-      <div class="bt-device-name">${name}</div>
-      <div class="bt-device-id">${id.substring(0, 20)}...</div>
-    </div>
-  `;
-  container.appendChild(div);
+$('sendCustom').onclick = () => {
+  const url = $('customUrl').value.trim();
+  if(!url) return;
+  sendCommand(url, 'Custom');
+  $('customUrl').value = '';
+  $('customInputSection').classList.add('hidden');
+};
+
+$('customUrl').addEventListener('keydown', e => {
+  if(e.key === 'Enter') $('sendCustom').click();
+});
+
+async function pasteFromClipboard(){
+  try {
+    const text = await navigator.clipboard.readText();
+    if(text){
+      sendCommand(text, 'Clipboard');
+    } else {
+      showToast('Clipboard is empty', true);
+    }
+  } catch(e){
+    showToast('Cannot access clipboard', true);
+  }
 }
 
-function getDeviceIcon(name) {
-  const n = name.toLowerCase();
-  if (n.includes('phone') || n.includes('mobile') || n.includes('android') || n.includes('iphone') || n.includes('galaxy')) return '📱';
-  if (n.includes('laptop') || n.includes('computer') || n.includes('mac') || n.includes('windows')) return '💻';
-  if (n.includes('tablet') || n.includes('ipad')) return '📟';
-  if (n.includes('watch') || n.includes('band')) return '⌚';
-  if (n.includes('headphone') || n.includes('earbud') || n.includes('airpod')) return '🎧';
-  return '🔵';
+/* ---------- Clipboard Monitor ---------- */
+function setupClipboardMonitor(){
+  $('clipboardToggle').addEventListener('change', e => {
+    if(e.target.checked){
+      startClipboardMonitor();
+    } else {
+      stopClipboardMonitor();
+    }
+  });
+  
+  if(/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)){
+    startClipboardMonitor();
+  }
 }
 
-function setupConnection() {
-  conn.on('open', () => { logLaptop('Data channel open', 'success'); flash(); });
-  conn.on('data', data => handleIncomingData(data, 'laptop'));
-  conn.on('close', () => {
-    logLaptop('Disconnected', 'error');
-    updateLaptopStatus('disconnected', 'Phone disconnected', 'P2P');
+function startClipboardMonitor(){
+  if(clipboardMonitor) return;
+  
+  clipboardMonitor = setInterval(async () => {
+    if(!conn || !conn.open) return;
+    if(!$('clipboardToggle').checked) return;
+    
+    try {
+      const text = await navigator.clipboard.readText();
+      
+      if(text && text !== lastClipboard && (text.startsWith('http://') || text.startsWith('https://'))){
+        lastClipboard = text;
+        sendCommand(text, 'Clipboard');
+        log('Auto-sent from clipboard: ' + text.substring(0, 50) + '...', 'ok');
+      }
+    } catch(e){}
+  }, 2000);
+}
+
+function stopClipboardMonitor(){
+  if(clipboardMonitor){
+    clearInterval(clipboardMonitor);
+    clipboardMonitor = null;
+  }
+}
+
+/* ---------- Web Share Target ---------- */
+function setupShareTarget(){
+  window.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const sharedUrl = urlParams.get('url') || urlParams.get('text');
+    
+    if(sharedUrl && role === 'phone'){
+      sendCommand(sharedUrl, 'Shared');
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
   });
 }
 
-function handleIncomingData(data, target) {
-  if (data.type === 'url' || data.type === 'app' || data.type === 'desktop') {
-    const msg = `⬅ ${data.name || data.payload}`;
-    if (target === 'laptop') logLaptop(msg, 'sync');
-    else logPhone(msg, 'sync');
-    
-    const shouldOpen = (target === 'laptop' && autoSync) || (target === 'phone' && phoneAutoSync);
-    if (shouldOpen) {
-      openContent(data.payload, data.type);
-      flash();
-      if (conn && conn.open) conn.send({ type: 'confirmed', payload: data.payload });
-    }
-  }
-}
-
-function openContent(payload, type) {
+/* ---------- Open on Laptop ---------- */
+function openOnLaptop(cmd, name){
   try {
-    if (type === 'desktop' || isAppURI(payload)) {
+    if(/^https?:\/\//i.test(cmd)){
+      window.open(cmd, '_blank', 'noopener');
+      return;
+    }
+    
+    if(/^[a-z][a-z0-9+.\-]*:/i.test(cmd)){
       const a = document.createElement('a');
-      a.href = payload;
+      a.href = cmd;
       a.style.display = 'none';
       document.body.appendChild(a);
       a.click();
-      setTimeout(() => a.remove(), 1000);
-    } else {
-      const win = window.open(payload, '_blank');
-      if (!win) {
-        const a = document.createElement('a');
-        a.href = payload; a.target = '_blank'; a.rel = 'noopener';
-        a.style.display = 'none';
-        document.body.appendChild(a); a.click(); a.remove();
-      }
+      setTimeout(() => a.remove(), 500);
+      return;
     }
-  } catch(e) { console.error(e); }
-}
-
-function isAppURI(uri) {
-  return /^(spotify|discord|tg|whatsapp|zoommtg|vscode|vlc|obs|steam|photoshop|illustrator|adobepremierepro|aftereffects|blender|unity|unreal|notepad|filezilla|winrar|7zip|gimp|audacity|handbrake|libreoffice|ms-word|ms-excel|ms-powerpoint|onenote|skype|signal|davinci|autodesk|maya|cinema4d|figma|notion|todoist|1password|bitwarden|calculator|snippingtool|mspaint|explorer|ms-settings|ms-windows-store|taskmgr|cmd|powershell|wt|wordpad|msn|bingweather|ms-photos|microsoft-camera|bingmaps|outlookcal|outlookmail|xbox|gamepass|clipchamp|msteams|onedrive|sharepoint|powerbi|visio|publisher|access|project|windowsdefender|control|regedit|services|eventvwr|perfmon|msinfo32|dxdiag|charmap|stickynotes|ms-clock|windowsvoice|zune|feedback|getstarted|ms-people|ms-phone|yourphone|googlechrome|firefox|microsoft-edge|opera):/i.test(uri);
-}
-
-function updateLaptopStatus(state, text, sub) {
-  document.getElementById('laptopStatusDot').className = 'status-dot ' + state;
-  document.getElementById('laptopStatusText').textContent = text;
-  document.getElementById('laptopStatusSub').textContent = sub;
-}
-
-function logLaptop(msg, type = 'info') {
-  const log = document.getElementById('laptopLog');
-  const entry = document.createElement('div');
-  entry.className = 'log-entry ' + type;
-  entry.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
-  log.insertBefore(entry, log.firstChild);
-  while (log.children.length > 30) log.removeChild(log.lastChild);
-}
-
-/* ==================== PHONE ==================== */
-function initPhone() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const code = urlParams.get('connect');
-  if (code) {
-    document.getElementById('manualCode').value = code;
-    setTimeout(() => connectManual(), 500);
+    
+    window.open('https://www.google.com/search?q=' + encodeURIComponent(cmd), '_blank');
+  } catch(e){
+    log('Failed to open: ' + e.message, 'err');
   }
 }
 
-function startScanner() {
-  if (isScanning) {
-    scanner.stop();
-    isScanning = false;
-    document.getElementById('scanBtn').textContent = '📷 Start Camera Scanner';
-    return;
-  }
-  scanner = new Html5Qrcode("scanner");
-  scanner.start(
-    { facingMode: "environment" },
-    { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 },
-    (decodedText) => {
-      const match = decodedText.match(/[?&]connect=([A-Z0-9]+)/i);
-      if (match) {
-        document.getElementById('manualCode').value = match[1];
-        connectManual();
-        scanner.stop(); isScanning = false;
-        document.getElementById('scanBtn').textContent = '📷 Start Camera Scanner';
-      } else if (decodedText.length === 6) {
-        document.getElementById('manualCode').value = decodedText.toUpperCase();
-        connectManual();
-        scanner.stop(); isScanning = false;
-      }
-    },
-    () => {}
-  ).then(() => {
-    isScanning = true;
-    document.getElementById('scanBtn').textContent = ' Stop Scanner';
-    logPhone('Camera started', 'info');
-  }).catch(err => {
-    logPhone('Camera error: ' + err, 'error');
-    alert('Camera access denied');
-  });
-}
-
-function connectManual() {
-  const code = document.getElementById('manualCode').value.trim().toUpperCase();
-  if (code.length < 4) { alert('Enter valid code'); return; }
-  logPhone('Connecting to: ' + code, 'info');
-  updatePhoneStatus('connecting', 'Connecting...', 'P2P');
+/* ---------- UI Helpers ---------- */
+function updateStatus(state, text){
+  const banner = $('statusBanner');
+  const dot = $('statusDot');
+  const statusText = $('statusText');
   
-  peer = new Peer({ debug: 1, config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] } });
-  peer.on('open', () => {
-    conn = peer.connect('syncflow-' + code, { reliable: true });
-    setupPhoneConnection();
-  });
-  peer.on('error', err => {
-    logPhone('Error: ' + err.type, 'error');
-    updatePhoneStatus('error', 'Failed', 'P2P');
-  });
+  banner.className = 'status-banner ' + state;
+  banner.classList.remove('hidden');
+  
+  if(state === 'connected'){
+    $('bannerIcon').textContent = '✓';
+    $('bannerText').textContent = text;
+    dot.classList.add('ok');
+    statusText.textContent = 'connected';
+    statusText.classList.add('ok');
+  } else if(state === 'waiting'){
+    $('bannerIcon').textContent = '⏳';
+    $('bannerText').textContent = text;
+    dot.classList.remove('ok');
+    statusText.textContent = 'waiting';
+    statusText.classList.remove('ok');
+  } else {
+    $('bannerIcon').textContent = '❌';
+    $('bannerText').textContent = text;
+    dot.classList.remove('ok');
+    statusText.textContent = 'offline';
+    statusText.classList.remove('ok');
+  }
 }
 
-function setupPhoneConnection() {
-  conn.on('open', () => {
-    logPhone('✅ Connected!', 'success');
-    updatePhoneStatus('connected', 'Connected & Syncing', 'P2P');
-    document.getElementById('phoneControls').classList.remove('hidden');
-    flash();
-    conn.send({ type: 'handshake', payload: 'phone-ready' });
-  });
-  conn.on('data', data => handleIncomingData(data, 'phone'));
-  conn.on('close', () => {
-    logPhone('Disconnected', 'error');
-    updatePhoneStatus('disconnected', 'Disconnected', 'P2P');
-    document.getElementById('phoneControls').classList.add('hidden');
-  });
+function log(msg, cls=''){
+  if(role !== 'laptop') return;
+  
+  const t = new Date().toLocaleTimeString();
+  const line = document.createElement('div');
+  line.className = 'e';
+  line.innerHTML = `<span class="t">${t}</span><span class="${cls}">${escapeHtml(msg)}</span>`;
+  $('log').prepend(line);
 }
 
-function updatePhoneStatus(state, text, sub) {
-  document.getElementById('phoneStatusDot').className = 'status-dot ' + state;
-  document.getElementById('phoneStatusText').textContent = text;
-  document.getElementById('phoneStatusSub').textContent = sub;
-  document.getElementById('phoneBadge').textContent = sub;
-  document.getElementById('phoneBadge').className = 'badge ' + (sub === 'BT' ? 'bt' : 'p2p');
+function clearLog(){
+  $('log').innerHTML = '';
 }
 
-function logPhone(msg, type = 'info') {
-  // Reuse laptop log if phone log doesn't exist (simplified)
-  console.log(`[PHONE] ${msg}`);
+function testOpen(){
+  log('Test: Opening example.com', 'ok');
+  openOnLaptop('https://example.com/', 'test');
 }
 
-async function scanBluetoothPhone() {
-  if (!navigator.bluetooth) { alert('Bluetooth not supported'); return; }
+function disconnect(){
+  if(conn) conn.close();
+  if(peer) peer.destroy();
+  location.reload();
+}
+
+function showToast(msg, isError=false){
+  const toast = $('toast');
+  toast.textContent = msg;
+  toast.className = 'toast show' + (isError ? ' error' : '');
+  setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+function escapeHtml(text){
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function beep(freq=660, ms=40){
   try {
-    logPhone('Scanning...', 'info');
-    const device = await navigator.bluetooth.requestDevice({
-      acceptAllDevices: true,
-      optionalServices: ['battery_service', 'device_information']
-    });
-    const name = device.name || 'Bluetooth Device';
-    logPhone(`✅ Found: ${name}`, 'success');
-    displayBTDevice(name, device.id, 'phone');
-    await device.gatt.connect();
-    logPhone('✅ GATT connected', 'success');
-  } catch (error) {
-    if (error.name !== 'NotFoundError') logPhone('BT error: ' + error.message, 'error');
-  }
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.frequency.value = freq;
+    o.type = 'sine';
+    g.gain.value = 0.05;
+    o.connect(g);
+    g.connect(ctx.destination);
+    o.start();
+    setTimeout(() => { o.stop(); ctx.close(); }, ms);
+  } catch(e){}
 }
-
-function connectBluetoothByName() {
-  const btName = document.getElementById('btNameInput').value.trim().toUpperCase();
-  if (!btName) { alert('Enter Bluetooth name'); return; }
-  alert(`To connect to "${btName}":\n\n1. Open phone Bluetooth settings\n2. Look for "${btName}"\n3. Tap to pair`);
-}
-
-/* ==================== SYNC TOGGLES ==================== */
-function toggleSync() {
-  autoSync = !autoSync;
-  document.getElementById('syncToggle').classList.toggle('active', autoSync);
-  logLaptop(autoSync ? '✅ Auto-sync ON' : '⏸️ Auto-sync OFF', 'info');
-  if (conn && conn.open) conn.send({ type: 'sync-state', payload: autoSync ? 'enabled' : 'disabled' });
-}
-
-function togglePhoneSync() {
-  phoneAutoSync = !phoneAutoSync;
-  document.getElementById('phoneSyncToggle').classList.toggle('active', phoneAutoSync);
-  logPhone(phoneAutoSync ? '✅ Auto-sync ON' : '⏸️ Auto-sync OFF', 'info');
-  if (conn && conn.open) conn.send({ type: 'sync-state', payload: phoneAutoSync ? 'enabled' : 'disabled' });
-}
-
-/* ==================== UTILITIES ==================== */
-function generateCode() {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let code = '';
-  for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
-  return code;
-}
-
-function generateShortCode() {
-  const chars = '0123456789ABCDEF';
-  let code = '';
-  for (let i = 0; i < 4; i++) code += chars[Math.floor(Math.random() * chars.length)];
-  return code;
-}
-
-function flash() {
-  const f = document.getElementById('flash');
-  f.classList.add('active');
-  setTimeout(() => f.classList.remove('active'), 200);
-}
-
-document.addEventListener('visibilitychange', () => {
-  if (!document.hidden && mode && conn && !conn.open) {
-    console.log('Rechecking connection...');
-  }
-});
 </script>
 </body>
 </html>
