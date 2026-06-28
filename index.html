@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+<meta name="theme-color" content="#0b0f17" />
+<title>InstantApp Launcher Pro</title>
+<link rel="manifest" href='data:application/manifest+json,{"name":"InstantApp Launcher","short_name":"InstantApp","start_url":".","display":"standalone","background_color":"#0b0f17","theme_color":"#0b0f17","icons":[{"src":"data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E⚡%3C/text%3E%3C/svg%3E","sizes":"192x192","type":"image/svg+xml"}]}' />
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root{
+    --bg:#0b0f17; --panel:#121826; --panel2:#1a2234;
+    --accent:#00e5a8; --accent2:#7c5cff; --danger:#ff4d6d;
+    --text:#e8eef7; --muted:#8a96ab; --ok:#22c55e;
+    --warning:#f59e0b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+       background:linear-gradient(160deg,#0b0f17,#121826);color:var(--text);min-height:100vh}
+  header{padding:18px 20px;border-bottom:1px solid #1f2a3d;display:flex;align-items:center;gap:12px;position:sticky;top:0;background:rgba(11,15,23,0.95);backdrop-filter:blur(10px);z-index:100}
+  header h1{font-size:18px;margin:0;letter-spacing:.3px;flex:1}
+  .dot{width:10px;height:10px;border-radius:50%;background:var(--danger);box-shadow:0 0 10px var(--danger)}
+  .dot.ok{background:var(--ok);box-shadow:0 0 12px var(--ok)}
+  main{max-width:900px;margin:0 auto;padding:18px}
+  .card{background:var(--panel);border:1px solid #1f2a3d;border-radius:16px;padding:18px;margin-bottom:16px}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .row > *{flex:1;min-width:180px}
+  label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.8px;font-weight:600}
+  input,select,button,textarea{
+    width:100%;padding:12px 14px;border-radius:10px;border:1px solid #263249;
+    background:var(--panel2);color:var(--text);font-size:15px;outline:none;font-family:inherit
+  }
+  input:focus,textarea:focus{border-color:var(--accent)}
+  button{cursor:pointer;font-weight:600;background:linear-gradient(135deg,var(--accent),var(--accent2));
+         border:none;color:#061018;transition:all .15s}
+  button:active{transform:scale(.97)}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  button.ghost{background:#1a2234;color:var(--text);border:1px solid #263249}
+  button.success{background:linear-gradient(135deg,#22c55e,#16a34a);color:white}
+  button.danger{background:linear-gradient(135deg,#ff4d6d,#dc2626);color:white}
+  button.warning{background:linear-gradient(135deg,#f59e0b,#d97706);color:white}
+  
+  /* Connection Workflow */
+  .workflow{display:grid;gap:16px;margin:20px 0}
+  .step{background:var(--panel2);border:2px solid #263249;border-radius:14px;padding:16px;position:relative}
+  .step.active{border-color:var(--accent);background:#1f2a3d}
+  .step.completed{border-color:var(--ok)}
+  .step-number{position:absolute;top:-12px;left:16px;background:var(--accent);color:#061018;
+               width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+               font-weight:700;font-size:14px}
+  .step.completed .step-number{background:var(--ok)}
+  .step-title{font-size:16px;font-weight:600;margin:8px 0 6px}
+  .step-desc{font-size:13px;color:var(--muted);line-height:1.5}
+  
+  /* QR Code */
+  #qrcode{display:flex;justify-content:center;margin:16px 0;padding:20px;background:#fff;border-radius:12px;min-height:240px;align-items:center}
+  #qrcode img,#qrcode canvas{max-width:100%!important;height:auto!important}
+  .qr-info{text-align:center;padding:12px;background:var(--panel2);border-radius:10px;margin-top:12px}
+  .qr-code-display{font-family:monospace;font-size:18px;font-weight:700;color:var(--accent);letter-spacing:2px}
+  
+  /* Apps Grid */
+  .apps{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin-top:10px}
+  .app{background:var(--panel2);border:1px solid #263249;border-radius:14px;padding:14px 8px;
+       text-align:center;cursor:pointer;transition:all .15s}
+  .app:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .app .ico{font-size:28px;display:block;margin-bottom:6px}
+  .app .nm{font-size:13px;color:var(--text)}
+  
+  /* Log */
+  .log{background:#0a0f1a;border:1px solid #1f2a3d;border-radius:12px;padding:12px;
+       max-height:250px;overflow:auto;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px}
+  .log .e{padding:4px 0;border-bottom:1px dashed #1a2249}
+  .log .t{color:var(--muted);margin-right:8px}
+  .log .ok{color:var(--ok)}
+  .log .err{color:var(--danger)}
+  .log .warn{color:var(--warning)}
+  
+  .hidden{display:none}
+  .pill{display:inline-block;padding:4px 12px;border-radius:999px;background:#1a2234;
+        border:1px solid #263249;font-size:12px;color:var(--muted);font-weight:600}
+  .pill.ok{background:#052e16;border-color:var(--ok);color:var(--ok)}
+  
+  .hint{color:var(--muted);font-size:12.5px;margin-top:8px;line-height:1.5}
+  .kbd{background:#0a0f1a;border:1px solid #263249;padding:2px 6px;border-radius:6px;font-family:monospace;font-size:12px}
+  
+  /* Quick Actions */
+  .quick-actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:12px}
+  .quick-btn{padding:16px 12px;border-radius:12px;background:var(--panel2);border:2px solid #263249;
+            cursor:pointer;transition:all .15s;text-align:center}
+  .quick-btn:hover{border-color:var(--accent);transform:translateY(-2px);background:#1f2a3d}
+  .quick-btn:active{transform:scale(.95)}
+  .quick-btn .icon{font-size:28px;display:block;margin-bottom:8px}
+  .quick-btn .label{font-size:13px;font-weight:600}
+  .quick-btn .desc{font-size:11px;color:var(--muted);margin-top:4px}
+  
+  /* Toast */
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(100px);
+         background:var(--accent);color:#061018;padding:14px 28px;border-radius:12px;font-weight:600;
+         opacity:0;pointer-events:none;transition:all .3s;z-index:1000;box-shadow:0 4px 20px rgba(0,229,168,.3)}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .toast.error{background:var(--danger);color:white}
+  
+  /* Clipboard Monitor */
+  .clipboard-monitor{background:linear-gradient(135deg,#1e3a8a,#3b82f6);border-radius:12px;padding:16px;margin:12px 0}
+  .clipboard-monitor h3{margin:0 0 8px;font-size:15px}
+  .clipboard-monitor p{margin:0;font-size:13px;opacity:.9}
+  .clipboard-toggle{display:flex;align-items:center;gap:10px;margin-top:12px}
+  .switch{position:relative;width:50px;height:26px}
+  .switch input{opacity:0;width:0;height:0}
+  .slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:#263249;
+          transition:.3s;border-radius:26px}
+  .slider:before{position:absolute;content:"";height:20px;width:20px;left:3px;bottom:3px;
+                 background-color:white;transition:.3s;border-radius:50%}
+  input:checked + .slider{background-color:var(--accent)}
+  input:checked + .slider:before{transform:translateX(24px)}
+  
+  /* Connection Status Banner */
+  .status-banner{padding:12px 16px;border-radius:10px;margin-bottom:16px;display:flex;align-items:center;gap:10px;font-weight:600}
+  .status-banner.connected{background:#052e16;border:1px solid var(--ok);color:var(--ok)}
+  .status-banner.disconnected{background:#450a0a;border:1px solid var(--danger);color:var(--danger)}
+  .status-banner.waiting{background:#422006;border:1px solid var(--warning);color:var(--warning)}
+  
+  @media(max-width:600px){
+    .quick-actions{grid-template-columns:1fr 1fr}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div id="statusDot" class="dot"></div>
+  <h1>⚡ InstantApp Launcher</h1>
+  <span id="statusText" class="pill">offline</span>
+</header>
+
+<main>
+
+  <!-- CONNECTION SETUP -->
+  <section id="setup" class="card">
+    <h2 style="margin:0 0 16px;font-size:18px">🔗 Connection Setup</h2>
+    
+    <div class="workflow">
+      <!-- STEP 1: LAPTOP -->
+      <div class="step" id="step1">
+        <div class="step-number">1</div>
+        <div class="step-title">💻 Open on Laptop FIRST</div>
+        <div class="step-desc">
+          Open this page on your laptop. It will automatically generate a QR code for your phone to scan.
+        </div>
+        <button id="startLaptop" class="success" style="margin-top:12px">I'm on my Laptop - Start</button>
+      </div>
+
+      <!-- STEP 2: QR CODE -->
+      <div class="step hidden" id="step2">
+        <div class="step-number">2</div>
+        <div class="step-title">📱 Scan QR Code with Phone</div>
+        <div class="step-desc">
+          Open your phone camera or QR scanner and scan the code below. This will open the page on your phone and connect automatically.
+        </div>
+        <div id="qrcode"></div>
+        <div class="qr-info">
+          <div style="color:var(--muted);font-size:12px;margin-bottom:4px">Or enter this code manually:</div>
+          <div class="qr-code-display" id="roomDisplay">---</div>
+        </div>
+        <div class="hint" style="text-align:center;margin-top:12px">
+          Waiting for phone to connect... <span id="waitTimer">0s</span>
+        </div>
+      </div>
+
+      <!-- STEP 3: PHONE -->
+      <div class="step hidden" id="step3">
+        <div class="step-number">3</div>
+        <div class="step-title">📱 Open on Phone</div>
+        <div class="step-desc">
+          If you're on your phone now, scan the QR code from your laptop screen, or enter the room code manually.
+        </div>
+        <button id="startPhone" class="success" style="margin-top:12px">I'm on my Phone - Connect</button>
+        <div id="manualConnect" class="hidden" style="margin-top:12px">
+          <label>Enter Room Code from Laptop</label>
+          <div class="row">
+            <input id="roomInput" placeholder="Enter code" autocomplete="off" />
+            <button id="connectBtn" style="flex:0 0 120px">Connect</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATUS BANNER -->
+  <div id="statusBanner" class="status-banner disconnected hidden">
+    <span id="bannerIcon">❌</span>
+    <span id="bannerText">Not connected</span>
+  </div>
+
+  <!-- PHONE UI -->
+  <section id="phoneUI" class="card hidden">
+    <h2 style="margin:0 0 16px;font-size:18px">📱 Phone Controller</h2>
+
+    <!-- Clipboard Monitor -->
+    <div class="clipboard-monitor">
+      <h3>📋 Auto-Send Copied Links</h3>
+      <p>Automatically send links you copy to your laptop</p>
+      <div class="clipboard-toggle">
+        <label class="switch">
+          <input type="checkbox" id="clipboardToggle" checked>
+          <span class="slider"></span>
+        </label>
+        <span style="font-size:13px">Enable clipboard monitoring</span>
+      </div>
+    </div>
+
+    <label>Quick Actions</label>
+    <div class="quick-actions">
+      <div class="quick-btn" onclick="sendCurrentPage()">
+        <span class="icon">📤</span>
+        <span class="label">Send This Page</span>
+        <span class="desc">Open current URL on laptop</span>
+      </div>
+      <div class="quick-btn" onclick="shareCurrentPage()">
+        <span class="icon">📲</span>
+        <span class="label">Share to Laptop</span>
+        <span class="desc">Use system share menu</span>
+      </div>
+      <div class="quick-btn" onclick="showCustomInput()">
+        <span class="icon">✍️</span>
+        <span class="label">Custom Link</span>
+        <span class="desc">Enter any URL or app</span>
+      </div>
+      <div class="quick-btn" onclick="pasteFromClipboard()">
+        <span class="icon">📋</span>
+        <span class="label">Paste & Send</span>
+        <span class="desc">Send clipboard content</span>
+      </div>
+    </div>
+
+    <div id="customInputSection" class="hidden" style="margin-top:16px">
+      <label>Send Custom URL or App</label>
+      <div class="row">
+        <input id="customUrl" placeholder="https://... or app://..." />
+        <button id="sendCustom" style="flex:0 0 120px">Send ⚡</button>
+      </div>
+    </div>
+
+    <label style="margin-top:20px">Quick Launch Apps</label>
+    <div class="apps" id="appGrid"></div>
+  </section>
+
+  <!-- LAPTOP UI -->
+  <section id="laptopUI" class="card hidden">
+    <h2 style="margin:0 0 16px;font-size:18px">💻 Laptop Receiver</h2>
+    
+    <div class="hint" style="margin-bottom:16px">
+      ✅ Ready to receive! Links and apps from your phone will open automatically here.
+    </div>
+
+    <label>Activity Log</label>
+    <div class="log" id="log"></div>
+    
+    <div class="row" style="margin-top:12px">
+      <button class="ghost" onclick="clearLog()">Clear Log</button>
+      <button class="ghost" onclick="testOpen()">Test Open</button>
+      <button class="ghost" onclick="disconnect()">Disconnect</button>
+    </div>
+  </section>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   InstantApp Launcher Pro - Perfect Connection Workflow
+   ============================================================ */
+
+const APPS = [
+  { name:"TikTok",   ico:"🎵", cmd:"tiktok://",          url:"https://www.tiktok.com/" },
+  { name:"YouTube",  ico:"▶️", cmd:"https://www.youtube.com/" },
+  { name:"Spotify",  ico:"🎧", cmd:"spotify:",           url:"https://open.spotify.com/" },
+  { name:"Netflix",  ico:"🎬", cmd:"https://www.netflix.com/" },
+  { name:"Chrome",   ico:"🌐", cmd:"https://www.google.com/" },
+  { name:"Twitter/X",ico:"🐦", cmd:"x://",               url:"https://x.com/" },
+  { name:"Instagram",ico:"📸", cmd:"instagram://",       url:"https://www.instagram.com/" },
+  { name:"WhatsApp", ico:"💬", cmd:"whatsapp://",        url:"https://web.whatsapp.com/" },
+  { name:"Telegram", ico:"✈️", cmd:"tg://",              url:"https://web.telegram.org/" },
+  { name:"Discord",  ico:"🎮", cmd:"discord://",         url:"https://discord.com/app" },
+  { name:"Steam",    ico:"🎮", cmd:"steam://open/main" },
+  { name:"Reddit",   ico:"👽", cmd:"https://www.reddit.com/" },
+  { name:"Gmail",    ico:"📧", cmd:"https://mail.google.com/" },
+  { name:"GitHub",   ico:"🐙", cmd:"https://github.com/" },
+];
+
+let role = null;
+let peer = null;
+let conn = null;
+let roomCode = null;
+let waitInterval = null;
+let clipboardMonitor = null;
+let lastClipboard = '';
+
+const $ = id => document.getElementById(id);
+
+/* ---------- Initialize ---------- */
+window.addEventListener('DOMContentLoaded', () => {
+  buildAppGrid();
+  setupClipboardMonitor();
+  setupShareTarget();
+  
+  // Auto-detect device
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  
+  // Check if opened via QR code (has room code in URL)
+  const urlParams = new URLSearchParams(window.location.search);
+  const qrRoom = urlParams.get('room');
+  
+  if(qrRoom){
+    // Opened from QR scan - auto-connect as phone
+    role = 'phone';
+    roomCode = qrRoom;
+    connectAsPhone();
+  }
+});
+
+/* ---------- Connection Workflow ---------- */
+$('startLaptop').onclick = () => startAsLaptop();
+$('startPhone').onclick = () => {
+  $('manualConnect').classList.remove('hidden');
+  $('startPhone').classList.add('hidden');
+};
+$('connectBtn').onclick = () => {
+  const code = $('roomInput').value.trim().toLowerCase();
+  if(!code){ showToast('Enter room code', true); return; }
+  roomCode = code;
+  connectAsPhone();
+};
+
+function startAsLaptop(){
+  role = 'laptop';
+  roomCode = generateRoomCode();
+  
+  // Update UI
+  $('step1').classList.add('completed');
+  $('step2').classList.remove('hidden');
+  $('step2').classList.add('active');
+  $('startLaptop').disabled = true;
+  $('startLaptop').textContent = '✓ Laptop Ready';
+  
+  // Generate QR Code
+  const connectUrl = `${window.location.origin}${window.location.pathname}?room=${roomCode}`;
+  generateQR(connectUrl);
+  $('roomDisplay').textContent = roomCode;
+  
+  // Start PeerJS as host
+  initPeerAsHost();
+  
+  // Start wait timer
+  let seconds = 0;
+  waitInterval = setInterval(() => {
+    seconds++;
+    $('waitTimer').textContent = seconds + 's';
+  }, 1000);
+  
+  showToast('QR code ready! Scan with your phone');
+}
+
+function connectAsPhone(){
+  role = 'phone';
+  
+  // Update UI
+  $('step3').classList.add('completed');
+  $('setup').classList.add('hidden');
+  $('phoneUI').classList.remove('hidden');
+  
+  // Connect to laptop
+  initPeerAsGuest();
+}
+
+function generateRoomCode(){
+  return Math.random().toString(36).substring(2, 8).toUpperCase();
+}
+
+function generateQR(text){
+  $('qrcode').innerHTML = '';
+  new QRCode($('qrcode'), {
+    text: text,
+    width: 220,
+    height: 220,
+    colorDark: "#000000",
+    colorLight: "#ffffff",
+    correctLevel: QRCode.CorrectLevel.H
+  });
+}
+
+/* ---------- PeerJS Connection ---------- */
+function initPeerAsHost(){
+  const peerId = 'instantapp-' + roomCode + '-host';
+  
+  peer = new Peer(peerId, { debug: 2 });
+  
+  peer.on('open', id => {
+    log('Laptop ready. Room: ' + roomCode, 'ok');
+    updateStatus('waiting', 'Waiting for phone...');
+  });
+  
+  peer.on('connection', c => {
+    attachConnection(c);
+  });
+  
+  peer.on('error', err => {
+    log('Error: ' + err.type, 'err');
+    if(err.type === 'unavailable-id'){
+      log('Room already in use. Try refreshing.', 'err');
+    }
+  });
+}
+
+function initPeerAsGuest(){
+  const peerId = 'instantapp-' + roomCode + '-guest';
+  const hostId = 'instantapp-' + roomCode + '-host';
+  
+  peer = new Peer(peerId, { debug: 2 });
+  
+  peer.on('open', id => {
+    log('Connecting to laptop...', 'ok');
+    updateStatus('waiting', 'Connecting...');
+    
+    const c = peer.connect(hostId, { reliable: true });
+    attachConnection(c);
+  });
+  
+  peer.on('error', err => {
+    log('Error: ' + err.type, 'err');
+    if(err.type === 'peer-unavailable'){
+      updateStatus('disconnected', 'Laptop not found. Is it open?');
+      showToast('Laptop not found. Check room code.', true);
+    }
+  });
+}
+
+function attachConnection(c){
+  conn = c;
+  
+  conn.on('open', () => {
+    // Connection established!
+    if(waitInterval) clearInterval(waitInterval);
+    
+    $('step2').classList.add('completed');
+    $('step2').classList.remove('active');
+    
+    if(role === 'laptop'){
+      $('step2').classList.add('hidden');
+      $('laptopUI').classList.remove('hidden');
+      log('✓ Phone connected!', 'ok');
+    } else {
+      log('✓ Connected to laptop!', 'ok');
+    }
+    
+    updateStatus('connected', 'Connected');
+    showToast('Connected! Ready to send links');
+    beep(880, 60);
+  });
+  
+  conn.on('data', data => {
+    if(role === 'laptop'){
+      log(`← ${data.name}: ${data.cmd}`, 'ok');
+      openOnLaptop(data.cmd, data.name);
+      showToast('Opened: ' + data.name);
+      beep(660, 40);
+    }
+  });
+  
+  conn.on('close', () => {
+    updateStatus('disconnected', 'Disconnected');
+    log('Connection closed', 'warn');
+    conn = null;
+    
+    // Auto-reconnect for phone
+    if(role === 'phone'){
+      setTimeout(() => {
+        log('Reconnecting...', 'warn');
+        initPeerAsGuest();
+      }, 2000);
+    }
+  });
+  
+  conn.on('error', err => {
+    log('Connection error: ' + err, 'err');
+  });
+}
+
+/* ---------- Send Functions ---------- */
+function sendCommand(cmd, name){
+  if(!conn || !conn.open){
+    showToast('Not connected!', true);
+    return;
+  }
+  
+  conn.send({ cmd, name, t: Date.now() });
+  
+  if(navigator.vibrate) navigator.vibrate(30);
+  beep(660, 40);
+  showToast('Sent: ' + name);
+}
+
+function sendCurrentPage(){
+  const url = window.location.href;
+  sendCommand(url, 'Current Page');
+}
+
+async function shareCurrentPage(){
+  if(navigator.share){
+    try {
+      await navigator.share({
+        title: 'Open on Laptop',
+        url: window.location.href
+      });
+    } catch(e){
+      if(e.name !== 'AbortError') console.error(e);
+    }
+  } else {
+    sendCurrentPage();
+  }
+}
+
+function showCustomInput(){
+  $('customInputSection').classList.toggle('hidden');
+  $('customUrl').focus();
+}
+
+$('sendCustom').onclick = () => {
+  const url = $('customUrl').value.trim();
+  if(!url) return;
+  sendCommand(url, 'Custom');
+  $('customUrl').value = '';
+  $('customInputSection').classList.add('hidden');
+};
+
+$('customUrl').addEventListener('keydown', e => {
+  if(e.key === 'Enter') $('sendCustom').click();
+});
+
+async function pasteFromClipboard(){
+  try {
+    const text = await navigator.clipboard.readText();
+    if(text){
+      sendCommand(text, 'Clipboard');
+    } else {
+      showToast('Clipboard is empty', true);
+    }
+  } catch(e){
+    showToast('Cannot access clipboard', true);
+  }
+}
+
+/* ---------- Clipboard Monitor ---------- */
+function setupClipboardMonitor(){
+  $('clipboardToggle').addEventListener('change', e => {
+    if(e.target.checked){
+      startClipboardMonitor();
+    } else {
+      stopClipboardMonitor();
+    }
+  });
+  
+  // Start by default on phone
+  if(/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)){
+    startClipboardMonitor();
+  }
+}
+
+function startClipboardMonitor(){
+  if(clipboardMonitor) return;
+  
+  clipboardMonitor = setInterval(async () => {
+    if(!conn || !conn.open) return;
+    if(!$('clipboardToggle').checked) return;
+    
+    try {
+      const text = await navigator.clipboard.readText();
+      
+      // Check if it's a URL and different from last
+      if(text && text !== lastClipboard && (text.startsWith('http://') || text.startsWith('https://'))){
+        lastClipboard = text;
+        sendCommand(text, 'Clipboard');
+        log('Auto-sent from clipboard: ' + text.substring(0, 50) + '...', 'ok');
+      }
+    } catch(e){
+      // Clipboard access denied or empty
+    }
+  }, 2000);
+}
+
+function stopClipboardMonitor(){
+  if(clipboardMonitor){
+    clearInterval(clipboardMonitor);
+    clipboardMonitor = null;
+  }
+}
+
+/* ---------- Web Share Target ---------- */
+function setupShareTarget(){
+  // Handle incoming shares
+  window.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const sharedUrl = urlParams.get('url') || urlParams.get('text');
+    
+    if(sharedUrl && role === 'phone'){
+      sendCommand(sharedUrl, 'Shared');
+      // Clean URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  });
+}
+
+/* ---------- Open on Laptop ---------- */
+function openOnLaptop(cmd, name){
+  try {
+    // HTTP/HTTPS URLs
+    if(/^https?:\/\//i.test(cmd)){
+      window.open(cmd, '_blank', 'noopener');
+      return;
+    }
+    
+    // Protocol handlers (app://)
+    if(/^[a-z][a-z0-9+.\-]*:/i.test(cmd)){
+      const a = document.createElement('a');
+      a.href = cmd;
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => a.remove(), 500);
+      return;
+    }
+    
+    // Fallback: search
+    window.open('https://www.google.com/search?q=' + encodeURIComponent(cmd), '_blank');
+  } catch(e){
+    log('Failed to open: ' + e.message, 'err');
+  }
+}
+
+/* ---------- App Grid ---------- */
+function buildAppGrid(){
+  const grid = $('appGrid');
+  APPS.forEach(a => {
+    const el = document.createElement('div');
+    el.className = 'app';
+    el.innerHTML = `<span class="ico">${a.ico}</span><span class="nm">${a.name}</span>`;
+    el.onclick = () => sendCommand(a.cmd, a.name);
+    grid.appendChild(el);
+  });
+}
+
+/* ---------- UI Helpers ---------- */
+function updateStatus(state, text){
+  const banner = $('statusBanner');
+  const dot = $('statusDot');
+  const statusText = $('statusText');
+  
+  banner.className = 'status-banner ' + state;
+  banner.classList.remove('hidden');
+  
+  if(state === 'connected'){
+    $('bannerIcon').textContent = '✓';
+    $('bannerText').textContent = text;
+    dot.classList.add('ok');
+    statusText.textContent = 'connected';
+    statusText.classList.add('ok');
+  } else if(state === 'waiting'){
+    $('bannerIcon').textContent = '⏳';
+    $('bannerText').textContent = text;
+    dot.classList.remove('ok');
+    statusText.textContent = 'waiting';
+    statusText.classList.remove('ok');
+  } else {
+    $('bannerIcon').textContent = '❌';
+    $('bannerText').textContent = text;
+    dot.classList.remove('ok');
+    statusText.textContent = 'offline';
+    statusText.classList.remove('ok');
+  }
+}
+
+function log(msg, cls=''){
+  if(role !== 'laptop') return;
+  
+  const t = new Date().toLocaleTimeString();
+  const line = document.createElement('div');
+  line.className = 'e';
+  line.innerHTML = `<span class="t">${t}</span><span class="${cls}">${escapeHtml(msg)}</span>`;
+  $('log').prepend(line);
+}
+
+function clearLog(){
+  $('log').innerHTML = '';
+}
+
+function testOpen(){
+  log('Test: Opening example.com', 'ok');
+  openOnLaptop('https://example.com/', 'test');
+}
+
+function disconnect(){
+  if(conn) conn.close();
+  if(peer) peer.destroy();
+  location.reload();
+}
+
+function showToast(msg, isError=false){
+  const toast = $('toast');
+  toast.textContent = msg;
+  toast.className = 'toast show' + (isError ? ' error' : '');
+  setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+function escapeHtml(text){
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function beep(freq=660, ms=40){
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.frequency.value = freq;
+    o.type = 'sine';
+    g.gain.value = 0.05;
+    o.connect(g);
+    g.connect(ctx.destination);
+    o.start();
+    setTimeout(() => { o.stop(); ctx.close(); }, ms);
+  } catch(e){}
+}
+</script>
+</body>
+</html>
