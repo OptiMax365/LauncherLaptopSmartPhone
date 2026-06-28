@@ -23,8 +23,6 @@
     background:radial-gradient(ellipse at top,#1a2332 0%,#0a0e1a 50%);
     color:var(--text);min-height:100vh;overflow-x:hidden;
   }
-  
-  /* Header */
   header{
     padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.05);
     display:flex;align-items:center;gap:12px;position:sticky;top:0;
@@ -40,10 +38,7 @@
   .dot{width:10px;height:10px;border-radius:50%;background:var(--danger);box-shadow:0 0 10px var(--danger);transition:all 0.3s}
   .dot.ok{background:var(--ok);box-shadow:0 0 15px var(--ok);animation:pulse 2s infinite}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
-  
   main{max-width:1000px;margin:0 auto;padding:20px}
-  
-  /* Cards */
   .card{
     background:linear-gradient(135deg,var(--panel) 0%,var(--panel2) 100%);
     border:1px solid rgba(255,255,255,0.08);border-radius:20px;
@@ -51,8 +46,6 @@
     backdrop-filter:blur(10px);
   }
   .card h2{font-size:18px;margin:0 0 20px;font-weight:700;display:flex;align-items:center;gap:10px}
-  
-  /* Status Banner */
   .status-banner{
     padding:16px 20px;border-radius:14px;margin-bottom:20px;
     display:flex;align-items:center;gap:12px;font-weight:600;
@@ -62,8 +55,6 @@
   .status-banner.connected{background:linear-gradient(135deg,#052e16,#064e3b);border:1px solid var(--ok);color:var(--ok)}
   .status-banner.disconnected{background:linear-gradient(135deg,#450a0a,#7f1d1d);border:1px solid var(--danger);color:var(--danger)}
   .status-banner.waiting{background:linear-gradient(135deg,#422006,#78350f);border:1px solid var(--warning);color:var(--warning)}
-  
-  /* Workflow Steps */
   .workflow{display:grid;gap:20px;margin:20px 0}
   .step{
     background:var(--panel2);border:2px solid rgba(255,255,255,0.08);
@@ -81,14 +72,10 @@
   .step.completed .step-number{background:linear-gradient(135deg,var(--ok),#16a34a)}
   .step-title{font-size:17px;font-weight:700;margin:10px 0 8px}
   .step-desc{font-size:13.5px;color:var(--muted);line-height:1.6}
-  
-  /* QR Code */
   #qrcode{display:flex;justify-content:center;margin:20px 0;padding:24px;background:#fff;border-radius:16px;min-height:260px;align-items:center;box-shadow:0 8px 32px rgba(0,0,0,0.3)}
   #qrcode img,#qrcode canvas{max-width:100%!important;height:auto!important;border-radius:8px}
   .qr-info{text-align:center;padding:16px;background:var(--panel3);border-radius:12px;margin-top:16px}
   .qr-code-display{font-family:"SF Mono",Monaco,monospace;font-size:22px;font-weight:700;color:var(--accent);letter-spacing:3px}
-  
-  /* Inputs & Buttons */
   input,select,button,textarea{
     width:100%;padding:14px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);
     background:var(--panel3);color:var(--text);font-size:15px;outline:none;font-family:inherit;
@@ -106,8 +93,6 @@
   button.ghost:hover{background:var(--panel2);border-color:var(--accent)}
   button.success{background:linear-gradient(135deg,#22c55e,#16a34a);box-shadow:0 4px 16px rgba(34,197,94,0.3)}
   button.danger{background:linear-gradient(135deg,#ef4444,#dc2626);box-shadow:0 4px 16px rgba(239,68,68,0.3)}
-  
-  /* Category Tabs */
   .category-tabs{
     display:flex;gap:8px;overflow-x:auto;padding:4px;margin-bottom:20px;
     scrollbar-width:none;-ms-overflow-style:none;
@@ -120,20 +105,12 @@
   }
   .tab:hover{background:var(--panel2);border-color:var(--accent)}
   .tab.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-color:transparent}
-  
-  /* Search */
-  .search-box{
-    position:relative;margin-bottom:20px;
-  }
-  .search-box input{
-    padding-left:44px;background:var(--panel3);border:1px solid rgba(255,255,255,0.1);
-  }
+  .search-box{position:relative;margin-bottom:20px}
+  .search-box input{padding-left:44px;background:var(--panel3);border:1px solid rgba(255,255,255,0.1)}
   .search-box::before{
     content:"🔍";position:absolute;left:16px;top:50%;transform:translateY(-50%);
     font-size:16px;opacity:0.6;
   }
-  
-  /* Apps Grid */
   .apps{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px;margin-top:12px}
   .app{
     background:linear-gradient(135deg,var(--panel2),var(--panel3));
@@ -152,13 +129,8 @@
   }
   .app:hover::before{transform:scaleX(1)}
   .app:active{transform:scale(0.95)}
-  .app .ico{
-    font-size:32px;display:block;margin-bottom:8px;
-    filter:drop-shadow(0 2px 8px rgba(0,0,0,0.3));
-  }
+  .app .ico{font-size:32px;display:block;margin-bottom:8px;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.3))}
   .app .nm{font-size:12.5px;font-weight:600;color:var(--text);line-height:1.3}
-  
-  /* Quick Actions */
   .quick-actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:16px}
   .quick-btn{
     padding:20px 16px;border-radius:16px;
@@ -177,8 +149,6 @@
   .quick-btn .icon{font-size:32px;display:block;margin-bottom:10px;position:relative;z-index:1}
   .quick-btn .label{font-size:14px;font-weight:700;position:relative;z-index:1}
   .quick-btn .desc{font-size:11.5px;color:var(--muted);margin-top:6px;position:relative;z-index:1}
-  
-  /* Clipboard Monitor */
   .clipboard-monitor{
     background:linear-gradient(135deg,#1e3a8a,#3b82f6);
     border-radius:16px;padding:20px;margin:16px 0;
@@ -200,8 +170,6 @@
   }
   input:checked + .slider{background-color:var(--accent)}
   input:checked + .slider:before{transform:translateX(26px)}
-  
-  /* Log */
   .log{
     background:#0a0f1a;border:1px solid rgba(255,255,255,0.08);border-radius:14px;
     padding:16px;max-height:300px;overflow:auto;
@@ -213,8 +181,6 @@
   .log .ok{color:var(--ok)}
   .log .err{color:var(--danger)}
   .log .warn{color:var(--warning)}
-  
-  /* Toast */
   .toast{
     position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120px);
     background:linear-gradient(135deg,var(--accent),var(--accent2));
@@ -224,7 +190,6 @@
   }
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
   .toast.error{background:linear-gradient(135deg,#ef4444,#dc2626);box-shadow:0 8px 32px rgba(239,68,68,0.4)}
-  
   .hidden{display:none!important}
   .pill{
     display:inline-block;padding:5px 14px;border-radius:999px;
@@ -232,44 +197,104 @@
     font-size:12px;color:var(--muted);font-weight:700;
   }
   .pill.ok{background:#052e16;border-color:var(--ok);color:var(--ok)}
-  
   .hint{color:var(--muted);font-size:13px;margin-top:10px;line-height:1.6}
-  
   .row{display:flex;gap:12px;flex-wrap:wrap}
   .row > *{flex:1;min-width:180px}
-  
   label{display:block;font-size:12px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;font-weight:700}
   
-  /* Launcher Modal */
+  /* Direction indicator */
+  .direction-banner{
+    background:linear-gradient(135deg,rgba(0,229,168,0.15),rgba(124,92,255,0.15));
+    border:1px solid var(--accent);border-radius:14px;padding:16px 20px;
+    margin-bottom:20px;display:flex;align-items:center;gap:14px;
+    font-weight:600;
+  }
+  .direction-banner .arrow{font-size:28px}
+  .direction-banner .text{flex:1}
+  .direction-banner .text .main{font-size:15px;margin-bottom:2px}
+  .direction-banner .text .sub{font-size:12px;color:var(--muted);font-weight:500}
+  
+  /* Settings panel */
+  .settings-row{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:14px 0;border-bottom:1px solid rgba(255,255,255,0.05);
+  }
+  .settings-row:last-child{border-bottom:none}
+  .settings-row .info{flex:1}
+  .settings-row .info .title{font-size:14px;font-weight:600;margin-bottom:2px}
+  .settings-row .info .desc{font-size:12px;color:var(--muted)}
+  
+  /* Launcher Permission Modal */
   .modal-overlay{
-    position:fixed;inset:0;background:rgba(0,0,0,0.75);
-    backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;
-    z-index:2000;animation:fadeIn 0.2s ease;
+    position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);
+    z-index:9999;display:flex;align-items:center;justify-content:center;
+    opacity:0;pointer-events:none;transition:opacity 0.3s;padding:20px;
   }
-  .modal-content{
-    background:linear-gradient(135deg,var(--panel) 0%,var(--panel2) 100%);
-    border:1px solid rgba(255,255,255,0.1);border-radius:24px;
-    padding:32px 28px;max-width:440px;width:90%;text-align:center;
-    box-shadow:0 20px 60px rgba(0,0,0,0.6);animation:slideUp 0.3s ease;
+  .modal-overlay.active{opacity:1;pointer-events:all}
+  .modal{
+    background:linear-gradient(135deg,var(--panel),var(--panel2));
+    border:2px solid var(--accent);border-radius:24px;padding:32px;
+    max-width:480px;width:100%;box-shadow:0 20px 60px rgba(0,229,168,0.3);
+    animation:modalSlide 0.4s ease;
   }
-  .modal-icon{font-size:56px;margin-bottom:16px;display:block;filter:drop-shadow(0 4px 12px rgba(0,229,168,0.3))}
-  .modal-content h2{font-size:22px;margin-bottom:12px;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-  .modal-content p{color:var(--muted);font-size:14.5px;line-height:1.7;margin-bottom:12px}
-  .modal-hint{background:var(--panel3);padding:14px;border-radius:14px;font-size:13.5px;color:var(--text);margin:16px 0;border:1px solid rgba(255,255,255,0.05)}
-  .modal-hint strong{color:var(--accent);font-weight:700}
-  .modal-checkbox{display:flex;align-items:center;gap:10px;margin:20px 0 0;justify-content:center;cursor:pointer;font-size:13.5px;color:var(--muted)}
-  .modal-checkbox input{width:18px;height:18px;accent-color:var(--accent);cursor:pointer}
-  .modal-actions{display:flex;gap:12px;margin-top:24px}
-  .modal-actions button{flex:1;padding:14px;font-size:15px;border-radius:14px}
-  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-  @keyframes slideUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
-
+  @keyframes modalSlide{from{transform:translateY(30px) scale(0.95);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
+  .modal-icon{
+    font-size:64px;text-align:center;margin-bottom:20px;
+    filter:drop-shadow(0 4px 12px rgba(0,229,168,0.4));
+  }
+  .modal h3{
+    font-size:22px;font-weight:800;text-align:center;margin-bottom:12px;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+    background-clip:text;
+  }
+  .modal .desc{
+    font-size:14.5px;line-height:1.7;color:var(--text);text-align:center;
+    margin-bottom:24px;
+  }
+  .modal .desc strong{color:var(--accent);font-weight:700}
+  .modal .steps{
+    background:var(--panel3);border-radius:12px;padding:16px;margin-bottom:24px;
+  }
+  .modal .steps .step-item{
+    display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;
+  }
+  .modal .steps .step-item:last-child{margin-bottom:0}
+  .modal .steps .step-num{
+    background:var(--accent);color:#000;width:24px;height:24px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;font-weight:700;
+    font-size:13px;flex-shrink:0;
+  }
+  .modal .steps .step-text{font-size:13.5px;line-height:1.5;flex:1}
+  .modal .action-btn{
+    width:100%;padding:18px;font-size:16px;font-weight:800;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    border:none;border-radius:14px;color:#fff;cursor:pointer;
+    box-shadow:0 8px 24px rgba(0,229,168,0.4);transition:all 0.2s;
+    margin-bottom:12px;
+  }
+  .modal .action-btn:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(0,229,168,0.5)}
+  .modal .action-btn:active{transform:scale(0.97)}
+  .modal .secondary-btn{
+    width:100%;padding:14px;font-size:14px;font-weight:600;
+    background:transparent;border:1px solid rgba(255,255,255,0.2);
+    border-radius:12px;color:var(--muted);cursor:pointer;transition:all 0.2s;
+  }
+  .modal .secondary-btn:hover{background:var(--panel3);color:var(--text)}
+  .modal .note{
+    font-size:12px;color:var(--muted);text-align:center;margin-top:16px;
+    line-height:1.5;
+  }
+  
   @media(max-width:600px){
     .quick-actions{grid-template-columns:1fr 1fr}
     .apps{grid-template-columns:repeat(auto-fill,minmax(100px,1fr))}
     .app{padding:14px 8px}
     .app .ico{font-size:28px}
     .app .nm{font-size:11.5px}
+    .modal{padding:24px}
+    .modal-icon{font-size:56px}
+    .modal h3{font-size:20px}
   }
 </style>
 </head>
@@ -337,125 +362,177 @@
     <span id="bannerText">Not connected</span>
   </div>
 
-  <!-- PHONE UI -->
-  <section id="phoneUI" class="card hidden">
-    <h2>📱 Phone Controller</h2>
+  <!-- UNIFIED UI (shown on BOTH devices after connection) -->
+  <section id="mainUI" class="hidden">
+    
+    <!-- Direction Banner -->
+    <div class="direction-banner">
+      <span class="arrow" id="dirArrow">📱 → 💻</span>
+      <div class="text">
+        <div class="main" id="dirMain">Tap any app to open on your Laptop</div>
+        <div class="sub" id="dirSub">Bidirectional — your laptop can also send to your phone</div>
+      </div>
+    </div>
 
-    <div class="clipboard-monitor">
-      <h3>📋 Auto-Send Copied Links</h3>
-      <p>Automatically send links you copy to your laptop</p>
-      <div class="clipboard-toggle">
+    <!-- Settings -->
+    <div class="card">
+      <h2>⚙️ Settings</h2>
+      <div class="settings-row">
+        <div class="info">
+          <div class="title">🚀 Auto-Open on Receive</div>
+          <div class="desc">Automatically open links/apps when received from the other device</div>
+        </div>
         <label class="switch">
-          <input type="checkbox" id="clipboardToggle" checked>
+          <input type="checkbox" id="autoOpenToggle" checked>
           <span class="slider"></span>
         </label>
-        <span style="font-size:13.5px">Enable clipboard monitoring</span>
+      </div>
+      <div class="settings-row">
+        <div class="info">
+          <div class="title">🔊 Sound Feedback</div>
+          <div class="desc">Play a beep when sending or receiving</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="soundToggle" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="settings-row">
+        <div class="info">
+          <div class="title">📋 Auto-Send Clipboard (Phone)</div>
+          <div class="desc">Automatically send copied links to the other device</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="clipboardToggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="ghost" onclick="testOpenLocal()">🧪 Test Local Open</button>
+        <button class="ghost" onclick="testSend()">📤 Test Send</button>
+        <button class="danger" onclick="disconnect()">🔌 Disconnect</button>
       </div>
     </div>
 
-    <label>Quick Actions</label>
-    <div class="quick-actions">
-      <div class="quick-btn" onclick="sendCurrentPage()">
-        <span class="icon">📤</span>
-        <span class="label">Send This Page</span>
-        <span class="desc">Open current URL on laptop</span>
+    <!-- Quick Actions -->
+    <div class="card">
+      <h2>⚡ Quick Actions</h2>
+      <div class="quick-actions">
+        <div class="quick-btn" onclick="sendCurrentPage()">
+          <span class="icon">📤</span>
+          <span class="label">Send This Page</span>
+          <span class="desc">Open current URL on other device</span>
+        </div>
+        <div class="quick-btn" onclick="showCustomInput()">
+          <span class="icon">✍️</span>
+          <span class="label">Custom Link</span>
+          <span class="desc">Enter any URL or app protocol</span>
+        </div>
+        <div class="quick-btn" onclick="pasteAndSend()">
+          <span class="icon">📋</span>
+          <span class="label">Paste & Send</span>
+          <span class="desc">Send clipboard content</span>
+        </div>
+        <div class="quick-btn" onclick="shareCurrentPage()">
+          <span class="icon">📲</span>
+          <span class="label">Share Menu</span>
+          <span class="desc">Use system share</span>
+        </div>
       </div>
-      <div class="quick-btn" onclick="shareCurrentPage()">
-        <span class="icon">📲</span>
-        <span class="label">Share to Laptop</span>
-        <span class="desc">Use system share menu</span>
-      </div>
-      <div class="quick-btn" onclick="showCustomInput()">
-        <span class="icon">✍️</span>
-        <span class="label">Custom Link</span>
-        <span class="desc">Enter any URL or app</span>
-      </div>
-      <div class="quick-btn" onclick="pasteFromClipboard()">
-        <span class="icon">📋</span>
-        <span class="label">Paste & Send</span>
-        <span class="desc">Send clipboard content</span>
+
+      <div id="customInputSection" class="hidden" style="margin-top:20px">
+        <label>Send Custom URL or App</label>
+        <div class="row">
+          <input id="customUrl" placeholder="https://... or vscode:// or spotify:" />
+          <button id="sendCustom" style="flex:0 0 120px">Send ⚡</button>
+        </div>
+        <div class="hint">
+          Supports: <b>http(s)://</b> URLs, <b>vscode://</b>, <b>spotify:</b>, <b>steam://</b>, 
+          <b>discord://</b>, <b>tg://</b>, any protocol your OS handles.
+        </div>
       </div>
     </div>
 
-    <div id="customInputSection" class="hidden" style="margin-top:20px">
-      <label>Send Custom URL or App</label>
-      <div class="row">
-        <input id="customUrl" placeholder="https://... or app://..." />
-        <button id="sendCustom" style="flex:0 0 120px">Send ⚡</button>
+    <!-- App Launcher -->
+    <div class="card">
+      <h2>🎯 App & Website Launcher</h2>
+      
+      <div class="search-box">
+        <input id="searchInput" type="text" placeholder="Search apps and websites..." />
+      </div>
+
+      <div class="category-tabs" id="categoryTabs"></div>
+
+      <div class="apps" id="appGrid"></div>
+    </div>
+
+    <!-- Activity Log -->
+    <div class="card">
+      <h2>📜 Activity Log</h2>
+      <div class="log" id="log">
+        <div class="e"><span class="t">--:--:--</span><span class="ok">Ready. Waiting for activity...</span></div>
+      </div>
+      <div style="margin-top:12px">
+        <button class="ghost" onclick="clearLog()" style="max-width:200px">Clear Log</button>
       </div>
     </div>
 
-    <label style="margin-top:24px">Search Apps</label>
-    <div class="search-box">
-      <input id="searchInput" type="text" placeholder="Search apps and websites..." />
-    </div>
-
-    <div class="category-tabs" id="categoryTabs"></div>
-
-    <label>Quick Launch Apps</label>
-    <div class="apps" id="appGrid"></div>
-  </section>
-
-  <!-- LAPTOP UI -->
-  <section id="laptopUI" class="card hidden">
-    <h2>💻 Laptop Receiver</h2>
-    
-    <div class="hint" style="margin-bottom:20px">
-      ✅ Ready to receive! Links and apps from your phone will open automatically here.
-    </div>
-
-    <label>Activity Log</label>
-    <div class="log" id="log"></div>
-    
-    <div class="row" style="margin-top:16px">
-      <button class="ghost" onclick="clearLog()">Clear Log</button>
-      <button class="ghost" onclick="testOpen()">Test Open</button>
-      <button class="ghost" onclick="disconnect()">Disconnect</button>
-    </div>
   </section>
 
 </main>
 
-<div class="toast" id="toast"></div>
-
-<!-- LAUNCHER PERMISSION MODAL -->
-<div id="launcherModal" class="modal-overlay hidden">
-  <div class="modal-content">
-    <span class="modal-icon">🚀</span>
-    <h2>Launcher Permission Required</h2>
-    <p>The InstantApp Launcher needs your permission to open external apps and links. This only works if you allow the launcher to proceed.</p>
-    <div class="modal-hint">
-      If your browser shows a prompt below, please click <strong>"Allow"</strong> or <strong>"Open"</strong> to launch the app.
+<!-- Launcher Permission Modal -->
+<div class="modal-overlay" id="launcherModal">
+  <div class="modal">
+    <div class="modal-icon">🚀</div>
+    <h3>Enable App Launcher</h3>
+    <div class="desc">
+      To open apps and websites instantly, your browser needs permission to let the <strong>Launcher</strong> work. This is a one-time setup.
     </div>
-    <label class="modal-checkbox">
-      <input type="checkbox" id="rememberChoice">
-      <span>Remember my choice for this session</span>
-    </label>
-    <div class="modal-actions">
-      <button id="modalCancel" class="ghost">Cancel</button>
-      <button id="modalAllow" class="success">Allow & Open</button>
+    <div class="steps">
+      <div class="step-item">
+        <div class="step-num">1</div>
+        <div class="step-text">Click the <strong>"Enable Launcher"</strong> button below</div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">2</div>
+        <div class="step-text">Your browser will show a permission prompt — click <strong>"Allow"</strong> or <strong>"Open"</strong></div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">3</div>
+        <div class="step-text">The app or website will open automatically from now on</div>
+      </div>
+    </div>
+    <button class="action-btn" id="enableLauncherBtn">🚀 Enable Launcher</button>
+    <button class="secondary-btn" id="cancelLauncherBtn">Maybe Later</button>
+    <div class="note">
+      💡 Tip: If you don't see the prompt, check your browser's address bar for a blocked icon.
     </div>
   </div>
 </div>
 
+<div class="toast" id="toast"></div>
+
 <script>
 /* ============================================================
-   InstantApp Launcher Pro - Enhanced with 100+ Apps
+   InstantApp Launcher Pro - Bidirectional + Auto-Open + Permission Modal
    ============================================================ */
 
 const APPS = [
   // Search & AI
   { name:"Google", ico:"🔍", cmd:"https://www.google.com/", cat:"search" },
   { name:"Bing", ico:"🅱️", cmd:"https://www.bing.com/", cat:"search" },
+  { name:"DuckDuckGo", ico:"🦆", cmd:"https://duckduckgo.com/", cat:"search" },
   { name:"ChatGPT", ico:"🤖", cmd:"https://chat.openai.com/", cat:"ai" },
   { name:"Claude", ico:"🧠", cmd:"https://claude.ai/", cat:"ai" },
   { name:"Perplexity", ico:"🔮", cmd:"https://www.perplexity.ai/", cat:"ai" },
   { name:"Gemini", ico:"✨", cmd:"https://gemini.google.com/", cat:"ai" },
   { name:"Copilot", ico:"🚀", cmd:"https://copilot.microsoft.com/", cat:"ai" },
+  { name:"Grok", ico:"🤯", cmd:"https://grok.com/", cat:"ai" },
+  { name:"Mistral", ico:"🌬️", cmd:"https://chat.mistral.ai/", cat:"ai" },
   
   // Social Media
   { name:"TikTok", ico:"🎵", cmd:"tiktok://", url:"https://www.tiktok.com/", cat:"social" },
-  { name:"YouTube", ico:"▶️", cmd:"https://www.youtube.com/", cat:"video" },
   { name:"Instagram", ico:"📸", cmd:"instagram://", url:"https://www.instagram.com/", cat:"social" },
   { name:"Twitter/X", ico:"🐦", cmd:"x://", url:"https://x.com/", cat:"social" },
   { name:"Facebook", ico:"👤", cmd:"fb://", url:"https://www.facebook.com/", cat:"social" },
@@ -463,10 +540,12 @@ const APPS = [
   { name:"Reddit", ico:"👽", cmd:"https://www.reddit.com/", cat:"social" },
   { name:"Pinterest", ico:"📌", cmd:"pinterest://", url:"https://www.pinterest.com/", cat:"social" },
   { name:"Snapchat", ico:"👻", cmd:"snapchat://", url:"https://www.snapchat.com/", cat:"social" },
-  { name:"Threads", ico:"🧵", cmd:"https://www.threads.net/", cat:"social" },
+  { name:"Threads", ico:"🧵", cmd:"barcelona://", url:"https://www.threads.net/", cat:"social" },
   { name:"Mastodon", ico:"🐘", cmd:"https://mastodon.social/", cat:"social" },
+  { name:"Bluesky", ico:"🦋", cmd:"https://bsky.app/", cat:"social" },
   
   // Video & Streaming
+  { name:"YouTube", ico:"▶️", cmd:"vnd.youtube://", url:"https://www.youtube.com/", cat:"video" },
   { name:"Netflix", ico:"🎬", cmd:"https://www.netflix.com/", cat:"video" },
   { name:"Disney+", ico:"🏰", cmd:"https://www.disneyplus.com/", cat:"video" },
   { name:"Prime Video", ico:"📺", cmd:"https://www.primevideo.com/", cat:"video" },
@@ -504,13 +583,15 @@ const APPS = [
   // Productivity
   { name:"Notion", ico:"📝", cmd:"notion://", url:"https://www.notion.so/", cat:"productivity" },
   { name:"Google Drive", ico:"📁", cmd:"https://drive.google.com/", cat:"productivity" },
-  { name:"Dropbox", ico:"📦", cmd:"https://www.dropbox.com/", cat:"productivity" },
+  { name:"Dropbox", ico:"📦", cmd:"db://", url:"https://www.dropbox.com/", cat:"productivity" },
   { name:"OneDrive", ico:"☁️", cmd:"https://onedrive.live.com/", cat:"productivity" },
   { name:"Obsidian", ico:"💎", cmd:"obsidian://", url:"https://obsidian.md/", cat:"productivity" },
   { name:"Evernote", ico:"🐘", cmd:"evernote://", url:"https://evernote.com/", cat:"productivity" },
   { name:"Todoist", ico:"✅", cmd:"https://todoist.com/", cat:"productivity" },
   { name:"Trello", ico:"📋", cmd:"https://trello.com/", cat:"productivity" },
   { name:"Asana", ico:"🎯", cmd:"https://asana.com/", cat:"productivity" },
+  { name:"Google Docs", ico:"📄", cmd:"https://docs.google.com/", cat:"productivity" },
+  { name:"Google Sheets", ico:"📊", cmd:"https://sheets.google.com/", cat:"productivity" },
   
   // Development
   { name:"GitHub", ico:"🐙", cmd:"https://github.com/", cat:"dev" },
@@ -521,6 +602,8 @@ const APPS = [
   { name:"Dev.to", ico:"👨‍💻", cmd:"https://dev.to/", cat:"dev" },
   { name:"npm", ico:"📦", cmd:"https://www.npmjs.com/", cat:"dev" },
   { name:"Docker Hub", ico:"🐳", cmd:"https://hub.docker.com/", cat:"dev" },
+  { name:"MDN", ico:"📖", cmd:"https://developer.mozilla.org/", cat:"dev" },
+  { name:"Replit", ico:"🔷", cmd:"https://replit.com/", cat:"dev" },
   
   // Shopping
   { name:"Amazon", ico:"📦", cmd:"https://www.amazon.com/", cat:"shopping" },
@@ -535,7 +618,6 @@ const APPS = [
   { name:"CNN", ico:"📺", cmd:"https://www.cnn.com/", cat:"news" },
   { name:"BBC", ico:"🇬🇧", cmd:"https://www.bbc.com/", cat:"news" },
   { name:"NYT", ico:"📰", cmd:"https://www.nytimes.com/", cat:"news" },
-  { name:"Reddit News", ico:"📡", cmd:"https://www.reddit.com/r/news/", cat:"news" },
   
   // Gaming
   { name:"Steam", ico:"🎮", cmd:"steam://open/main", cat:"gaming" },
@@ -568,6 +650,7 @@ const APPS = [
   { name:"Chrome", ico:"🌐", cmd:"googlechrome:", cat:"windows" },
   { name:"Firefox", ico:"🦊", cmd:"firefox:", cat:"windows" },
   { name:"VLC", ico:"🎬", cmd:"vlc://", cat:"windows" },
+  { name:"Notepad", ico:"📝", cmd:"file:text.txt", cat:"windows" },
 ];
 
 const CATEGORIES = [
@@ -596,16 +679,18 @@ let waitInterval = null;
 let clipboardMonitor = null;
 let lastClipboard = '';
 let currentCategory = 'all';
+let pendingOpen = null; // Store pending open request
 
 const $ = id => document.getElementById(id);
+const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
 /* ---------- Initialize ---------- */
 window.addEventListener('DOMContentLoaded', () => {
   buildCategoryTabs();
   buildAppGrid();
-  setupClipboardMonitor();
-  setupShareTarget();
   setupSearch();
+  setupCustomInput();
+  setupLauncherModal();
   
   const urlParams = new URLSearchParams(window.location.search);
   const qrRoom = urlParams.get('room');
@@ -615,11 +700,52 @@ window.addEventListener('DOMContentLoaded', () => {
     roomCode = qrRoom;
     connectAsPhone();
   }
+  
+  window.addEventListener('focus', () => {
+    if(conn && conn.open) log('Page focused — ready to receive', 'ok');
+  });
+  
+  // Cleanup on page close
+  window.addEventListener('beforeunload', () => {
+    if(conn) conn.close();
+    if(peer) peer.destroy();
+  });
 });
+
+/* ---------- Launcher Permission Modal ---------- */
+function setupLauncherModal(){
+  $('enableLauncherBtn').onclick = () => {
+    hideLauncherModal();
+    if(pendingOpen){
+      // User clicked enable - try to open now (this counts as user interaction)
+      setTimeout(() => {
+        openLocally(pendingOpen.cmd, pendingOpen.name, true);
+        pendingOpen = null;
+      }, 100);
+    }
+  };
+  
+  $('cancelLauncherBtn').onclick = () => {
+    hideLauncherModal();
+    pendingOpen = null;
+    log('Launcher permission declined', 'warn');
+  };
+}
+
+function showLauncherModal(cmd, name){
+  pendingOpen = { cmd, name };
+  $('launcherModal').classList.add('active');
+  log('Launcher permission required for: ' + name, 'warn');
+}
+
+function hideLauncherModal(){
+  $('launcherModal').classList.remove('active');
+}
 
 /* ---------- Category Tabs ---------- */
 function buildCategoryTabs(){
   const tabs = $('categoryTabs');
+  tabs.innerHTML = '';
   CATEGORIES.forEach(cat => {
     const el = document.createElement('div');
     el.className = 'tab' + (cat.id === 'all' ? ' active' : '');
@@ -628,7 +754,7 @@ function buildCategoryTabs(){
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
       el.classList.add('active');
       currentCategory = cat.id;
-      buildAppGrid();
+      buildAppGrid($('searchInput').value.toLowerCase());
     };
     tabs.appendChild(el);
   });
@@ -647,11 +773,9 @@ function buildAppGrid(searchTerm = ''){
   grid.innerHTML = '';
   
   let filtered = APPS;
-  
   if(currentCategory !== 'all'){
     filtered = filtered.filter(a => a.cat === currentCategory);
   }
-  
   if(searchTerm){
     filtered = filtered.filter(a => 
       a.name.toLowerCase().includes(searchTerm) ||
@@ -663,13 +787,47 @@ function buildAppGrid(searchTerm = ''){
     const el = document.createElement('div');
     el.className = 'app';
     el.innerHTML = `<span class="ico">${a.ico}</span><span class="nm">${a.name}</span>`;
-    el.onclick = () => sendCommand(a.cmd, a.name);
+    el.onclick = () => handleAppClick(a);
     grid.appendChild(el);
   });
   
   if(filtered.length === 0){
     grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)">No apps found</div>';
   }
+}
+
+/* ---------- Handle App Click (Bidirectional) ---------- */
+function handleAppClick(app){
+  let cmd = app.cmd;
+  
+  if(isMobile && app.url && !cmd.startsWith('http')){
+    if(['tiktok://','instagram://','x://','fb://','whatsapp://','tg://','discord://','spotify:','steam://'].includes(cmd)){
+      cmd = app.cmd;
+    } else {
+      cmd = app.url;
+    }
+  }
+  
+  sendCommand(cmd, app.name);
+}
+
+/* ---------- Custom Input ---------- */
+function setupCustomInput(){
+  $('sendCustom').onclick = () => {
+    const url = $('customUrl').value.trim();
+    if(!url){ showToast('Enter a URL', true); return; }
+    sendCommand(url, 'Custom');
+    $('customUrl').value = '';
+    $('customInputSection').classList.add('hidden');
+  };
+  $('customUrl').addEventListener('keydown', e => {
+    if(e.key === 'Enter') $('sendCustom').click();
+  });
+}
+
+function showCustomInput(){
+  $('customInputSection').classList.toggle('hidden');
+  $('customUrl').focus();
 }
 
 /* ---------- Connection Workflow ---------- */
@@ -712,11 +870,8 @@ function startAsLaptop(){
 
 function connectAsPhone(){
   role = 'phone';
-  
   $('step3').classList.add('completed');
   $('setup').classList.add('hidden');
-  $('phoneUI').classList.remove('hidden');
-  
   initPeerAsGuest();
 }
 
@@ -739,17 +894,14 @@ function generateQR(text){
 /* ---------- PeerJS Connection ---------- */
 function initPeerAsHost(){
   const peerId = 'instantapp-' + roomCode + '-host';
-  
-  peer = new Peer(peerId, { debug: 2 });
+  peer = new Peer(peerId, { debug: 1 });
   
   peer.on('open', id => {
     log('Laptop ready. Room: ' + roomCode, 'ok');
     updateStatus('waiting', 'Waiting for phone...');
   });
   
-  peer.on('connection', c => {
-    attachConnection(c);
-  });
+  peer.on('connection', c => attachConnection(c));
   
   peer.on('error', err => {
     log('Error: ' + err.type, 'err');
@@ -760,15 +912,14 @@ function initPeerAsHost(){
 }
 
 function initPeerAsGuest(){
-  const peerId = 'instantapp-' + roomCode + '-guest';
+  const peerId = 'instantapp-' + roomCode + '-guest-' + Date.now();
   const hostId = 'instantapp-' + roomCode + '-host';
   
-  peer = new Peer(peerId, { debug: 2 });
+  peer = new Peer(peerId, { debug: 1 });
   
   peer.on('open', id => {
     log('Connecting to laptop...', 'ok');
     updateStatus('waiting', 'Connecting...');
-    
     const c = peer.connect(hostId, { reliable: true });
     attachConnection(c);
   });
@@ -788,30 +939,24 @@ function attachConnection(c){
   conn.on('open', () => {
     if(waitInterval) clearInterval(waitInterval);
     
-    $('step2').classList.add('completed');
-    $('step2').classList.remove('active');
+    document.querySelectorAll('.step').forEach(s => s.classList.add('completed'));
     
-    if(role === 'laptop'){
-      $('step2').classList.add('hidden');
-      $('laptopUI').classList.remove('hidden');
-      log('✓ Phone connected!', 'ok');
-    } else {
-      log('✓ Connected to laptop!', 'ok');
-    }
+    setTimeout(() => {
+      $('setup').classList.add('hidden');
+      $('mainUI').classList.remove('hidden');
+    }, 400);
+    
+    updateDirectionBanner();
     
     updateStatus('connected', 'Connected');
-    showToast('Connected! Ready to send links');
+    log('✓ Connected! Bidirectional link active.', 'ok');
+    showToast('Connected! Tap any app to send');
     beep(880, 60);
+    
+    if($('clipboardToggle').checked) startClipboardMonitor();
   });
   
-  conn.on('data', data => {
-    if(role === 'laptop'){
-      log(`← ${data.name}: ${data.cmd}`, 'ok');
-      openOnLaptop(data.cmd, data.name);
-      showToast('Opened: ' + data.name);
-      beep(660, 40);
-    }
-  });
+  conn.on('data', data => handleIncoming(data));
   
   conn.on('close', () => {
     updateStatus('disconnected', 'Disconnected');
@@ -826,35 +971,154 @@ function attachConnection(c){
     }
   });
   
-  conn.on('error', err => {
-    log('Connection error: ' + err, 'err');
-  });
+  conn.on('error', err => log('Connection error: ' + err, 'err'));
 }
 
-/* ---------- Send Functions ---------- */
+/* ---------- Handle Incoming Data ---------- */
+function handleIncoming(data){
+  const from = data.from || 'other';
+  const cmd = data.cmd;
+  const name = data.name || cmd;
+  
+  log(`← Received from ${from}: ${name}`, 'ok');
+  beep(660, 40);
+  showToast(`Opening: ${name}`);
+  
+  if($('autoOpenToggle').checked){
+    setTimeout(() => {
+      const success = openLocally(cmd, name);
+      if(!success){
+        // Blocked - show modal
+        showLauncherModal(cmd, name);
+      }
+    }, 50);
+  } else {
+    log('Auto-open disabled. Click to open manually.', 'warn');
+  }
+  
+  try {
+    conn.send({ type: 'ack', cmd, name, t: Date.now() });
+  } catch(e){}
+}
+
+/* ---------- Open Locally (on this device) ---------- */
+function openLocally(cmd, name, isUserInteraction = false){
+  if(!cmd) return false;
+  
+  try {
+    // HTTP/HTTPS URLs
+    if(/^https?:\/\//i.test(cmd)){
+      const win = window.open(cmd, '_blank', 'noopener,noreferrer');
+      if(win){
+        log(`✓ Opened in new tab: ${name}`, 'ok');
+        return true;
+      }
+      // Blocked
+      if(!isUserInteraction){
+        return false; // Will trigger modal
+      }
+      // User interaction but still blocked - show manual link
+      showManualOpen(cmd, name);
+      return false;
+    }
+    
+    // Protocol handlers
+    if(/^[a-z][a-z0-9+.\-]*:/i.test(cmd)){
+      const a = document.createElement('a');
+      a.href = cmd;
+      a.style.display = 'none';
+      a.setAttribute('target', '_blank');
+      a.setAttribute('rel', 'noopener');
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => a.remove(), 1000);
+      log(`✓ Launched: ${name}`, 'ok');
+      return true;
+    }
+    
+    // Fallback: search
+    const searchUrl = 'https://www.google.com/search?q=' + encodeURIComponent(cmd);
+    window.open(searchUrl, '_blank', 'noopener');
+    log(`✓ Opened search: ${cmd}`, 'ok');
+    return true;
+  } catch(e){
+    log('✗ Open failed: ' + e.message, 'err');
+    if(!isUserInteraction){
+      return false;
+    }
+    showManualOpen(cmd, name);
+    return false;
+  }
+}
+
+/* ---------- Manual Open Fallback ---------- */
+function showManualOpen(cmd, name){
+  const container = document.createElement('div');
+  container.style.cssText = 'background:linear-gradient(135deg,#78350f,#422006);border:1px solid var(--warning);border-radius:12px;padding:14px;margin-top:12px;animation:slideIn 0.3s ease;';
+  container.innerHTML = `
+    <div style="font-size:13px;font-weight:700;color:var(--warning);margin-bottom:8px">⚠️ Launcher blocked. Click to open:</div>
+    <a href="${escapeAttr(cmd)}" target="_blank" rel="noopener" style="display:inline-block;padding:10px 16px;background:var(--warning);color:#000;border-radius:8px;text-decoration:none;font-weight:700;font-size:13px;word-break:break-all;">${escapeHtml(name || cmd)}</a>
+  `;
+  
+  const logEl = $('log');
+  logEl.insertBefore(container, logEl.firstChild);
+  
+  setTimeout(() => {
+    const link = container.querySelector('a');
+    if(link){
+      link.click();
+      setTimeout(() => container.remove(), 500);
+    }
+  }, 100);
+}
+
+/* ---------- Send Command to Other Device ---------- */
 function sendCommand(cmd, name){
   if(!conn || !conn.open){
     showToast('Not connected!', true);
     return;
   }
   
-  conn.send({ cmd, name, t: Date.now() });
+  const payload = {
+    type: 'open',
+    cmd: cmd,
+    name: name,
+    from: role === 'laptop' ? 'laptop' : 'phone',
+    t: Date.now()
+  };
+  
+  conn.send(payload);
+  
+  const target = role === 'laptop' ? 'Phone' : 'Laptop';
+  log(`→ Sent to ${target}: ${name}`, 'ok');
+  showToast(`Sent to ${target}: ${name}`);
+  beep(880, 40);
   
   if(navigator.vibrate) navigator.vibrate(30);
-  beep(660, 40);
-  showToast('Sent: ' + name);
 }
 
+/* ---------- Quick Actions ---------- */
 function sendCurrentPage(){
   const url = window.location.href;
   sendCommand(url, 'Current Page');
+}
+
+async function pasteAndSend(){
+  try {
+    const text = await navigator.clipboard.readText();
+    if(!text){ showToast('Clipboard is empty', true); return; }
+    sendCommand(text, 'Clipboard');
+  } catch(e){
+    showToast('Cannot access clipboard. Paste manually.', true);
+    showCustomInput();
+  }
 }
 
 async function shareCurrentPage(){
   if(navigator.share){
     try {
       await navigator.share({
-        title: 'Open on Laptop',
+        title: 'Open on other device',
         url: window.location.href
       });
     } catch(e){
@@ -865,53 +1129,37 @@ async function shareCurrentPage(){
   }
 }
 
-function showCustomInput(){
-  $('customInputSection').classList.toggle('hidden');
-  $('customUrl').focus();
+/* ---------- Test Functions ---------- */
+function testOpenLocal(){
+  log('🧪 Test: Opening example.com locally', 'ok');
+  const success = openLocally('https://example.com/', 'Test Page');
+  if(!success){
+    showLauncherModal('https://example.com/', 'Test Page');
+  }
 }
 
-$('sendCustom').onclick = () => {
-  const url = $('customUrl').value.trim();
-  if(!url) return;
-  sendCommand(url, 'Custom');
-  $('customUrl').value = '';
-  $('customInputSection').classList.add('hidden');
-};
-
-$('customUrl').addEventListener('keydown', e => {
-  if(e.key === 'Enter') $('sendCustom').click();
-});
-
-async function pasteFromClipboard(){
-  try {
-    const text = await navigator.clipboard.readText();
-    if(text){
-      sendCommand(text, 'Clipboard');
-    } else {
-      showToast('Clipboard is empty', true);
-    }
-  } catch(e){
-    showToast('Cannot access clipboard', true);
+function testSend(){
+  if(!conn || !conn.open){
+    showToast('Not connected!', true);
+    return;
   }
+  sendCommand('https://example.com/', 'Test Send');
 }
 
 /* ---------- Clipboard Monitor ---------- */
-function setupClipboardMonitor(){
-  $('clipboardToggle').addEventListener('change', e => {
-    if(e.target.checked){
-      startClipboardMonitor();
-    } else {
-      stopClipboardMonitor();
-    }
-  });
-  
-  if(/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)){
+$('clipboardToggle').addEventListener('change', e => {
+  if(e.target.checked){
     startClipboardMonitor();
+  } else {
+    stopClipboardMonitor();
   }
-}
+});
 
 function startClipboardMonitor(){
   if(clipboardMonitor) return;
+  if(!isMobile){
+    log('Clipboard monitor works best on mobile', 'warn');
+  }
   
   clipboardMonitor = setInterval(async () => {
     if(!conn || !conn.open) return;
@@ -919,11 +1167,9 @@ function startClipboardMonitor(){
     
     try {
       const text = await navigator.clipboard.readText();
-      
       if(text && text !== lastClipboard && (text.startsWith('http://') || text.startsWith('https://'))){
         lastClipboard = text;
         sendCommand(text, 'Clipboard');
-        log('Auto-sent from clipboard: ' + text.substring(0, 50) + '...', 'ok');
       }
     } catch(e){}
   }, 2000);
@@ -936,116 +1182,19 @@ function stopClipboardMonitor(){
   }
 }
 
-/* ---------- Web Share Target ---------- */
-function setupShareTarget(){
-  window.addEventListener('DOMContentLoaded', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const sharedUrl = urlParams.get('url') || urlParams.get('text');
-    
-    if(sharedUrl && role === 'phone'){
-      sendCommand(sharedUrl, 'Shared');
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-  });
-}
-
-/* ---------- Open on Laptop ---------- */
-function openOnLaptop(cmd, name){
-  // Check session storage for user's launcher permission choice
-  let choice = sessionStorage.getItem('launcher_permission_choice');
-  
-  if(choice === 'block'){
-    log(`Blocked by user settings: ${name}`, 'warn');
-    showToast('Opening blocked by your settings', true);
-    return;
-  }
-
-  const doOpen = () => {
-    let appOpened = false;
-    
-    // Listen for focus loss to detect if the app successfully launched
-    const handleVisibility = () => {
-      if(document.hidden) appOpened = true;
-    };
-    const handleBlur = () => { appOpened = true; };
-    
-    document.addEventListener('visibilitychange', handleVisibility);
-    window.addEventListener('blur', handleBlur);
-
-    try {
-      if(/^https?:\/\//i.test(cmd)){
-        const a = document.createElement('a');
-        a.href = cmd;
-        a.target = '_blank';
-        a.rel = 'noopener';
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(() => a.remove(), 500);
-      } 
-      else if(/^[a-z][a-z0-9+.\-]*:/i.test(cmd)){
-        // For custom URI schemes, use an anchor click to trigger the native browser prompt
-        const a = document.createElement('a');
-        a.href = cmd;
-        a.style.display = 'none';
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(() => a.remove(), 500);
-      } 
-      else {
-        window.open('https://www.google.com/search?q=' + encodeURIComponent(cmd), '_blank');
-      }
-    } catch(e){
-      log('Failed to open: ' + e.message, 'err');
-    }
-
-    // Check if the app opened after 2.5 seconds
-    setTimeout(() => {
-      document.removeEventListener('visibilitychange', handleVisibility);
-      window.removeEventListener('blur', handleBlur);
-      
-      if(!appOpened){
-        log(`App might be blocked by browser: ${name}`, 'warn');
-        showToast('App didn\'t open. Please check browser launcher permissions.', true);
-      } else {
-        log(`Successfully launched: ${name}`, 'ok');
-      }
-    }, 2500);
-  };
-
-  // Show modal if no choice has been made for this session
-  if(choice === 'allow'){
-    doOpen();
-  } else {
-    showLauncherModal(doOpen);
-  }
-}
-
-function showLauncherModal(onAllow){
-  const modal = $('launcherModal');
-  modal.classList.remove('hidden');
-  
-  // Reset checkbox state
-  $('rememberChoice').checked = false;
-  
-  $('modalCancel').onclick = () => {
-    modal.classList.add('hidden');
-    if($('rememberChoice').checked){
-      sessionStorage.setItem('launcher_permission_choice', 'block');
-      log('User chose to block launcher permissions for this session', 'warn');
-    }
-  };
-  
-  $('modalAllow').onclick = () => {
-    modal.classList.add('hidden');
-    if($('rememberChoice').checked){
-      sessionStorage.setItem('launcher_permission_choice', 'allow');
-      log('User chose to allow launcher permissions for this session', 'ok');
-    }
-    onAllow();
-  };
-}
-
 /* ---------- UI Helpers ---------- */
+function updateDirectionBanner(){
+  if(role === 'laptop'){
+    $('dirArrow').textContent = '💻 → 📱';
+    $('dirMain').textContent = 'Tap any app to open on your Phone';
+    $('dirSub').textContent = 'Your phone can also send to this laptop — fully bidirectional';
+  } else {
+    $('dirArrow').textContent = '📱 → 💻';
+    $('dirMain').textContent = 'Tap any app to open on your Laptop';
+    $('dirSub').textContent = 'Your laptop can also send to this phone — fully bidirectional';
+  }
+}
+
 function updateStatus(state, text){
   const banner = $('statusBanner');
   const dot = $('statusDot');
@@ -1076,22 +1225,26 @@ function updateStatus(state, text){
 }
 
 function log(msg, cls=''){
-  if(role !== 'laptop') return;
-  
   const t = new Date().toLocaleTimeString();
   const line = document.createElement('div');
   line.className = 'e';
   line.innerHTML = `<span class="t">${t}</span><span class="${cls}">${escapeHtml(msg)}</span>`;
-  $('log').prepend(line);
+  const logEl = $('log');
+  if(logEl){
+    const placeholder = logEl.querySelector('.e span.ok');
+    if(placeholder && placeholder.textContent.includes('Ready. Waiting')){
+      logEl.innerHTML = '';
+    }
+    logEl.prepend(line);
+    while(logEl.children.length > 100){
+      logEl.removeChild(logEl.lastChild);
+    }
+  }
 }
 
 function clearLog(){
   $('log').innerHTML = '';
-}
-
-function testOpen(){
-  log('Test: Opening example.com', 'ok');
-  openOnLaptop('https://example.com/', 'test');
+  log('Log cleared', 'ok');
 }
 
 function disconnect(){
@@ -1113,7 +1266,12 @@ function escapeHtml(text){
   return div.innerHTML;
 }
 
+function escapeAttr(text){
+  return text.replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
 function beep(freq=660, ms=40){
+  if(!$('soundToggle').checked) return;
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
     const o = ctx.createOscillator();
@@ -1127,6 +1285,13 @@ function beep(freq=660, ms=40){
     setTimeout(() => { o.stop(); ctx.close(); }, ms);
   } catch(e){}
 }
+
+/* ---------- Keep connection alive ---------- */
+setInterval(() => {
+  if(conn && conn.open){
+    try { conn.send({ type: 'ping', t: Date.now() }); } catch(e){}
+  }
+}, 25000);
 </script>
 </body>
 </html>
