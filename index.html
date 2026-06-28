@@ -240,6 +240,24 @@
   
   label{display:block;font-size:12px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;font-weight:700}
   
+  /* Modal */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(10, 14, 26, 0.85); backdrop-filter: blur(12px);
+    display: flex; align-items: center; justify-content: center; z-index: 2000;
+    animation: fadeIn 0.25s ease;
+  }
+  .modal-content {
+    background: linear-gradient(135deg, var(--panel) 0%, var(--panel2) 100%);
+    border: 1px solid rgba(255,255,255,0.1); border-radius: 24px;
+    padding: 36px 28px; max-width: 420px; width: 90%; text-align: center; 
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  }
+  .modal-icon { font-size: 56px; margin-bottom: 16px; display: block; }
+  .modal-content h3 { font-size: 22px; margin-bottom: 14px; font-weight: 800; }
+  .modal-content p { color: var(--muted); font-size: 14.5px; line-height: 1.7; margin-bottom: 28px; }
+  .modal-content p strong { color: var(--text); }
+  @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+  
   @media(max-width:600px){
     .quick-actions{grid-template-columns:1fr 1fr}
     .apps{grid-template-columns:repeat(auto-fill,minmax(100px,1fr))}
@@ -393,6 +411,19 @@
 </main>
 
 <div class="toast" id="toast"></div>
+
+<!-- LAUNCHER MODAL -->
+<div id="launcherModal" class="modal-overlay hidden">
+  <div class="modal-content">
+    <span class="modal-icon">🚀</span>
+    <h3 id="modalTitle">Open with Launcher?</h3>
+    <p id="modalText">
+      To open this app, your browser needs to allow the launcher to open this link.<br><br>
+      Please click <strong>Allow</strong> on the browser prompt. This only works when the launcher is allowed.
+    </p>
+    <button id="modalBtn" class="success">Open App</button>
+  </div>
+</div>
 
 <script>
 /* ============================================================
@@ -553,7 +584,91 @@ let clipboardMonitor = null;
 let lastClipboard = '';
 let currentCategory = 'all';
 
+// Launcher Modal State
+let launcherCheckTimeout = null;
+let appOpened = false;
+
 const $ = id => document.getElementById(id);
+
+/* ---------- Launcher Modal Logic ---------- */
+function handleVisibilityChange() {
+  if (document.hidden || document.visibilityState === 'hidden') {
+    appOpened = true;
+    if(launcherCheckTimeout) clearTimeout(launcherCheckTimeout);
+    closeLauncherModal();
+  }
+}
+
+function handleWindowBlur() {
+  appOpened = true;
+  if(launcherCheckTimeout) clearTimeout(launcherCheckTimeout);
+  closeLauncherModal();
+}
+
+document.addEventListener('visibilitychange', handleVisibilityChange);
+window.addEventListener('blur', handleWindowBlur);
+
+function showLauncherModal(appName, cmd) {
+  const modal = $('launcherModal');
+  const title = $('modalTitle');
+  const text = $('modalText');
+  const btn = $('modalBtn');
+  
+  title.textContent = `Open with Launcher?`;
+  text.innerHTML = `To open <strong>${appName}</strong>, your browser needs to allow the launcher to open this link.<br><br>Please click <strong>Allow</strong> on the browser prompt. This only works when the launcher is allowed.`;
+  btn.textContent = `Open ${appName}`;
+  btn.className = 'success';
+  btn.disabled = false;
+  
+  btn.onclick = () => {
+    text.textContent = 'Waiting for launcher to open...';
+    btn.disabled = true;
+    btn.textContent = 'Opening...';
+    
+    appOpened = false;
+    triggerProtocolLink(cmd);
+    
+    launcherCheckTimeout = setTimeout(() => {
+      if (!appOpened) {
+        title.textContent = `Launcher Blocked or App Not Found`;
+        text.innerHTML = `It looks like the launcher was blocked or the app isn't installed.<br><br>Please check your browser settings and <strong>allow the launcher</strong> to open links for this site.`;
+        btn.textContent = `Close`;
+        btn.className = 'ghost';
+        btn.disabled = false;
+        btn.onclick = closeLauncherModal;
+      }
+    }, 3000);
+  };
+  
+  modal.classList.remove('hidden');
+}
+
+function closeLauncherModal() {
+  $('launcherModal').classList.add('hidden');
+  if(launcherCheckTimeout) clearTimeout(launcherCheckTimeout);
+}
+
+function triggerProtocolLink(cmd) {
+  const a = document.createElement('a');
+  a.href = cmd;
+  a.style.display = 'none';
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => a.remove(), 500);
+}
+
+/* 
+ * NOTE ON BROWSER PERMISSIONS REVERSION:
+ * Modern browsers do not allow JavaScript to programmatically change, set, or revert 
+ * the "Always allow/block" permission state for custom protocol handlers (launchers). 
+ * This is a strict security feature to prevent malicious sites from altering browser settings. 
+ * The code below ensures the UI modal closes properly when the website is closed, but the 
+ * actual browser permission state can only be managed manually by the user in their browser settings.
+ */
+window.addEventListener('beforeunload', () => {
+  closeLauncherModal();
+});
 
 /* ---------- Initialize ---------- */
 window.addEventListener('DOMContentLoaded', () => {
@@ -914,12 +1029,7 @@ function openOnLaptop(cmd, name){
     }
     
     if(/^[a-z][a-z0-9+.\-]*:/i.test(cmd)){
-      const a = document.createElement('a');
-      a.href = cmd;
-      a.style.display = 'none';
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => a.remove(), 500);
+      showLauncherModal(name, cmd);
       return;
     }
     
